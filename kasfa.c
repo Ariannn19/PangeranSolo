@@ -10,6 +10,7 @@ void find (char text[][max_chr],int linecount){
 
     printf("masukan kata yang ingin kamu cari: ");
     fgets(keyword,sizeof(keyword),stdin);
+    keyword[strcspn(keyword, "\n")] = 0;
 
     i = 0;
     while(i < linecount){
