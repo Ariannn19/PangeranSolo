@@ -2,7 +2,7 @@
 #include <string.h>
 #include "arian.h"
 
-// --- FUNGSI INPUT & SHOW TETAP SAMA ---
+// FUNGSI INPUT&SHOW
 int inputText(char text[MAX_LINES][MAX_LENGTH], int lines) {
     printf("Masukkan teks (ketik 'EXIT' di baris baru untuk selesai):\n");
     while (lines < MAX_LINES) {
@@ -27,7 +27,7 @@ void showText(char text[MAX_LINES][MAX_LENGTH], int lines) {
     printf("---------------------------------\n");
 }
 
-// FUNGSI TAMPILKAN CLIPBOARD (Tambahkan kode ini)
+// FUNGSI TAMPILKAN CLIPBOARD
 void showClipboard(char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines) {
     printf("\n-------- ISI CLIPBOARD --------\n");
     if (clip_lines == 0) {
@@ -40,7 +40,7 @@ void showClipboard(char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines) {
     printf("-------------------------------\n");
 }
 
-// --- FUNGSI SELECT SEBAGAI PEMBANTU ---
+//FUNGSI SELECT 
 void selectText(int lines, int *start, int *end) {
     if (lines == 0) {
         printf("Teks kosong, tidak ada yang bisa dipilih.\n");
@@ -64,7 +64,7 @@ void copyText(char text[MAX_LINES][MAX_LENGTH], int lines,
               char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines) {
     int start, end;
     
-    // Panggil fungsi select di sini!
+    // Panggil fungsi select
     selectText(lines, &start, &end);
 
     if (start == 0 || end == 0) {
@@ -85,7 +85,7 @@ int cutText(char text[MAX_LINES][MAX_LENGTH], int lines,
             char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines) {
     int start, end;
     
-    // Panggil fungsi select di sini!
+    // Panggil fungsi select
     selectText(lines, &start, &end);
 
     if (start == 0 || end == 0) {
@@ -109,7 +109,7 @@ int cutText(char text[MAX_LINES][MAX_LENGTH], int lines,
     return lines - jumlah_hapus;
 }
 
-// --- FUNGSI PASTE
+  // FUNGSI PASTE
 int pasteText(char text[MAX_LINES][MAX_LENGTH], int lines, 
               char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines) {
     
@@ -118,81 +118,87 @@ int pasteText(char text[MAX_LINES][MAX_LENGTH], int lines,
         return lines;
     }
 
-    int pos, index;
+    int pos, index = 0;
+    int is_new_line = 0; // Penanda apakah ini baris baru
     
-    // 1. Tentukan baris target
-    printf("Paste di baris ke berapa (1-%d)? ", lines);
+    // 1. Tentukan baris target (Sekarang batasnya sampai lines + 1)
+    printf("Paste di baris ke berapa (1-%d)? ", lines + 1);
     scanf("%d", &pos);
     getchar(); // Bersihkan enter
 
-    if (pos < 1 || pos > lines) {
+    if (pos < 1 || pos > lines + 1) {
         printf("Posisi baris tidak valid!\n");
         return lines;
     }
 
-    // 2. Tampilkan teks dan tentukan indeks pemotongan
-    int len = strlen(text[pos - 1]);
-    printf("Isi baris [%d]: %s\n", pos, text[pos - 1]);
-    printf("Paste mulai di huruf ke berapa (0 - %d)? ", len);
-    scanf("%d", &index);
-    getchar(); // Bersihkan enter
+    // 2. Cek apakah ini menimpa baris lama atau membuat baris baru
+    if (pos <= lines) {
+        // Jika baris sudah ada isinya, tanya index pemotongan
+        int len = strlen(text[pos - 1]);
+        printf("Isi baris [%d]: %s\n", pos, text[pos - 1]);
+        printf("Paste mulai di huruf ke berapa (0 - %d)? ", len);
+        scanf("%d", &index);
+        getchar(); 
 
-    // Jika user iseng memasukkan angka minus atau kelebihan
-    if (index < 0) index = 0;
-    if (index > len) index = len;
+        if (index < 0) index = 0;
+        if (index > len) index = len;
+    } else {
+        // Jika paste di baris baru (pos == lines + 1)
+        is_new_line = 1;
+        text[pos - 1][0] = '\0'; // Siapkan baris kosong
+        lines++;                 // Tambah total baris sementara
+        index = 0;               // Pasti disisipkan dari huruf pertama (0)
+    }
 
     // 3. Gabungkan seluruh isi clipboard dengan pemisah spasi
-    // Kita siapkan penampung besar (5000) agar tidak error saat digabung
     char combined_clip[5000] = ""; 
     for (int i = 0; i < clip_lines; i++) {
         strcat(combined_clip, clipboard[i]);
         if (i < clip_lines - 1) {
-            strcat(combined_clip, " "); // Tambahkan spasi antar baris clipboard
+            strcat(combined_clip, " ");
         }
     }
 
-    // 4. Rakit teks baru (Bagian Kiri + Clipboard Gabungan + Bagian Kanan)
+    // 4. Rakit teks baru
     char temp_line[6000] = "";
-    strncpy(temp_line, text[pos - 1], index); // Ambil potongan kiri dari teks asli
-    temp_line[index] = '\0';                  // Beri batas akhir
-    strcat(temp_line, combined_clip);         // Tempel isi clipboard di tengah
-    strcat(temp_line, text[pos - 1] + index); // Sambung dengan potongan kanan
+    strncpy(temp_line, text[pos - 1], index); 
+    temp_line[index] = '\0';                  
+    strcat(temp_line, combined_clip);         
+    strcat(temp_line, text[pos - 1] + index); 
 
     // 5. Cek batas maksimal (MAX_LENGTH)
     int total_len = strlen(temp_line);
-    int max_chars_per_line = MAX_LENGTH - 1; // Sisakan 1 untuk karakter '\0'
+    int max_chars_per_line = MAX_LENGTH - 1;
 
     if (total_len <= max_chars_per_line) {
-        // Jika masih muat 1 baris, langsung timpa baris aslinya
         strcpy(text[pos - 1], temp_line);
     } else {
-        // Jika kepanjangan, kita harus pecah ke baris baru
+        // Jika kepanjangan dan tumpah
         int needed_lines = total_len / max_chars_per_line;
         if (total_len % max_chars_per_line != 0) needed_lines++; 
         
         int tambahan = needed_lines - 1;
 
-        // Pastikan dokumen tidak kepenuhan jika barisnya bertambah
         if (lines + tambahan > MAX_LINES) {
-            printf("Gagal: Kapasitas dokumen tidak cukup menampung teks tumpahan!\n");
+            printf("Gagal: Kapasitas dokumen tidak cukup menampung teks!\n");
+            if (is_new_line) lines--; // Batalkan penambahan baris jika gagal
             return lines;
         }
 
-        // Geser sisa dokumen ke bawah untuk memberi ruang tumpahan
+        // Geser sisa dokumen ke bawah untuk ruang tumpahan
         for (int i = lines - 1; i >= pos; i--) {
             strcpy(text[i + tambahan], text[i]);
         }
-        lines += tambahan; // Perbarui total baris dokumen
+        lines += tambahan;
 
-        // Potong-potong temp_line sesuai MAX_LENGTH dan masukkan ke barisnya
+        // Potong-potong temp_line
         for (int i = 0; i < needed_lines; i++) {
             strncpy(text[pos - 1 + i], temp_line + (i * max_chars_per_line), max_chars_per_line);
             text[pos - 1 + i][max_chars_per_line] = '\0';
         }
-        
         printf("Teks melampaui batas dan otomatis tumpah ke baris baru.\n");
     }
 
-    printf("Paste di tengah kalimat berhasil!\n");
+    printf("Paste berhasil!\n");
     return lines;
 }

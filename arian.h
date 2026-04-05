@@ -8,6 +8,8 @@ int inputText(char text[MAX_LINES][MAX_LENGTH], int lines);
 
 void showText(char text[MAX_LINES][MAX_LENGTH], int lines);
 
+void showClipboard(char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines);
+
 void selectText(int lines, int *start, int *end);
 
 void copyText(char text[MAX_LINES][MAX_LENGTH], int lines, char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines);
