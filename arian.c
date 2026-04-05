@@ -21,7 +21,7 @@ void showText(char text[MAX_LINES][MAX_LENGTH], int lines) {
         printf("(Kosong)\n");
     } else {
         for (int i = 0; i < lines; i++) {
-            printf("[%02d] %s\n", i + 1, text[i]);
+            printf("%d: %s\n", i + 1, text[i]);
         }
     }
     printf("---------------------------------\n");
@@ -34,7 +34,7 @@ void showClipboard(char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines) {
         printf("(Kosong)\n");
     } else {
         for (int i = 0; i < clip_lines; i++) {
-            printf("[%02d] %s\n", i + 1, clipboard[i]);
+            printf("%d: %s\n", i + 1, clipboard[i]);
         }
     }
     printf("-------------------------------\n");
@@ -59,7 +59,7 @@ void selectText(int lines, int *start, int *end) {
     }
 }
 
-// --- FUNGSI COPY ---
+// --- FUNGSI COPY
 void copyText(char text[MAX_LINES][MAX_LENGTH], int lines, 
               char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines) {
     int start, end;
@@ -159,7 +159,7 @@ int pasteText(char text[MAX_LINES][MAX_LENGTH], int lines,
         }
     }
 
-    // 4. Rakit teks baru
+    // 4. Buat teks baru
     char temp_line[6000] = "";
     strncpy(temp_line, text[pos - 1], index); 
     temp_line[index] = '\0';                  
