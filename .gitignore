@@ -1,0 +1,2 @@
+# Abaikan semua file JSON di folder .vscode
+.vscode/*.json
