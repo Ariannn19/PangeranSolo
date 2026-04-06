@@ -8,6 +8,7 @@ void displaytext(){
     int i = 0;
     while(i < linecount){
         printf("%d: %s\n", i + 1, text[i]);
+        i++;
     }
 }
 
@@ -24,7 +25,7 @@ void find (char text[][max_chr],int linecount){
     while(i < linecount){
 
         if(strstr(text[i], keyword) != NULL){
-            printf("Kata ada di baris ke %d: %s\n",i + 1, keyword);
+            printf("Kata ada di baris ke %d: %s\n",i + 1, text[i]);
             found = 1;
         }
 
@@ -90,7 +91,11 @@ void wraptext(char text[][max_chr], int linecount){
             }
             printf("\n");
 
-            awal = akhir + 1;
+            if(text[i][akhir] == ' '){
+                 awal = akhir + 1;
+            } else {
+                 awal = akhir;
+            }               
         }
         i++;
     }
