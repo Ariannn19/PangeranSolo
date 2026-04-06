@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include "main.h"
 #include "kasfa.h"
 #define max_wrap 10
 
