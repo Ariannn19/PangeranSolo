@@ -3,6 +3,14 @@
 #include "main.h"
 #include "kasfa.h"
 
+linecount = 0;
+void displaytext(){
+    int i = 0;
+    while(i < linecount){
+        printf("%d: %s\n", i + 1, text[i]);
+    }
+}
+
 void find (char text[][max_chr],int linecount){
     char keyword [20];
     int found = 0;
