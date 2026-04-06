@@ -2,6 +2,7 @@
 #include <string.h>
 #include "main.h"
 #include "kasfa.h"
+#define max_wrap 10
 
 linecount = 0;
 void displaytext(){
@@ -58,4 +59,40 @@ void wordcounter (char text[][max_chr], int linecount){
     printf("\nJumlah baris: %d", linecount);
     printf("\nJumlah kata: %d", totalkata);
     printf("\nJumlah karakter: %d", totalchr);
+}
+
+void wraptext(char text[][max_chr], int linecount){
+    int i = 0;
+    while(i < linecount){
+        int len = strlen(text[i]);
+        int awal = 0;
+
+        while(awal < len){
+            int akhir = awal + max_wrap;
+
+            if(akhir >= len){
+                akhir = len;
+            }
+            else{
+                int k = akhir;
+                while(k > awal && text[i][k] != ' '){
+                    k--;
+                }
+
+                if(k > awal){
+                akhir = k;
+            }
+            }
+
+            int j = awal;
+            while(j < akhir){
+                printf("%c", text[i][j]);
+                j++;
+            }
+            printf("\n");
+
+            awal = akhir + 1;
+        }
+        i++;
+    }
 }
