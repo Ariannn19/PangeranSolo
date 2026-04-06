@@ -4,7 +4,7 @@
 #define max_wrap 10
 
 linecount = 0;
-void displaytext(){
+void displaytext(char text[][max_chr], int linecount){
     int i = 0;
     while(i < linecount){
         printf("%d: %s\n", i + 1, text[i]);
