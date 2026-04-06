@@ -3,7 +3,7 @@
 #include "kasfa.h"
 #define max_wrap 10
 
-linecount = 0;
+int linecount = 0;
 void displaytext(){
     int i = 0;
     while(i < linecount){
