@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "file_manager.h"
+#include "undo_redo.h"
 
 int main() {
     char kertas[100][50];
@@ -42,19 +43,42 @@ int main() {
             }
         }
     } else {
+        printf("Masukkan teks (ketik 'END' untuk selesai):\n");
+        jumlah_baris = 0;
+        stack riwayat_edit;
+        init_stack(&riwayat_edit);
+
+        while(jumlah_baris < 100) {
+            printf("[%d] ", jumlah_baris);
+            fgets(kertas[jumlah_baris], sizeof(kertas[jumlah_baris]), stdin);
+
+            // Detektor save
+            if(strncmp(kertas[jumlah_baris], "END\n", 4) == 0) {
+                printf("Selesai memasukkan teks.\n");
+                break;
+            }
+
+            // Detektor undo
+            if (strncmp(kertas[jumlah_baris], "UNDO\n", 5) == 0) {
+                strcpy(kertas[jumlah_baris], ""); // Hapus tulisan UNDO dari layar
+                pop(&riwayat_edit, kertas, &jumlah_baris);
+                continue; // Ngulangi input tanpa menambah jumlah_baris
+            }
+
+            // Detektor redo
+            if (strncmp(kertas[jumlah_baris], "REDO\n", 5) == 0) {
+                strcpy(kertas[jumlah_baris], ""); // Hapus tulisan REDO dari layar
+                redo(&riwayat_edit, kertas, &jumlah_baris);
+                continue; // Ngulangi input tanpa menambah jumlah_baris
+            }
+
+            kertas[jumlah_baris][strcspn(kertas[jumlah_baris], "\n")] = '\0'; // Menghapus newline
+            jumlah_baris++;
+            push(&riwayat_edit, kertas, jumlah_baris); // Simpan tulisan saat ini ke stack untuk undo
+        }
         printf("Masukkan nama file untuk disimpan: ");
         scanf("%s", filename);
         getchar(); // Membersihkan newline dari input sebelumnya
-
-        strcpy(kertas[0], "Arikita rina");
-        strcpy(kertas[1], "yorokobi kitto");
-        strcpy(kertas[2], "fitari nara");
-        strcpy(kertas[3], "mitsuki rareru");
-        strcpy(kertas[4], "sawagashi hibi ni");
-        strcpy(kertas[5], "waraenai kimi ni");
-        strcpy(kertas[6], "omoi tsuku kagiri mabushii asu wo");
-        strcpy(kertas[7], "akenai yoru ni ochite yuku maeni");
-        jumlah_baris = 8;
     }
 
     if (jumlah_baris > 0) {
