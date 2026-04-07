@@ -1,8 +1,8 @@
 #ifndef ARIAN_H
 #define ARIAN_H
 
-#define MAX_LINES 100
-#define MAX_LENGTH 256
+#define MAX_LINES  1000
+#define MAX_LENGTH 100
 
 int inputText(char text[MAX_LINES][MAX_LENGTH], int lines);
 
