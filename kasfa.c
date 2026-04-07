@@ -3,8 +3,8 @@
 #include "kasfa.h"
 #define max_wrap 10
 
-linecount = 0;
-void displaytext(char text[][max_chr], int linecount){
+//int linecount = 0;
+void displaytext(char text[][MAX_LENGTH], int linecount){
     int i = 0;
     while(i < linecount){
         printf("%d: %s\n", i + 1, text[i]);
@@ -12,7 +12,7 @@ void displaytext(char text[][max_chr], int linecount){
     }
 }
 
-void find (char text[][max_chr],int linecount){
+void find (char text[][MAX_LENGTH],int linecount){
     char keyword [20];
     int found = 0;
     int i;
@@ -37,7 +37,7 @@ void find (char text[][max_chr],int linecount){
         }
 }
 
-void wordcounter (char text[][max_chr], int linecount){
+void wordcounter (char text[][MAX_LENGTH], int linecount){
     int totalchr = 0;
     int totalkata = 0;
 
@@ -61,7 +61,7 @@ void wordcounter (char text[][max_chr], int linecount){
     printf("\nJumlah karakter: %d", totalchr);
 }
 
-void wraptext(char text[][max_chr], int linecount){
+void wraptext(char text[][MAX_LENGTH], int linecount){
     int i = 0;
     while(i < linecount){
         int len = strlen(text[i]);
