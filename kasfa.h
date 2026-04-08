@@ -1,14 +1,14 @@
 #ifndef kasfa_H
 #define kasfa_H
-#define max_brs 200
-#define max_chr 200
+#define MAX_LINES 1000
+#define MAX_LENGTH 100
 
-extern char text[max_brs][max_chr];
-extern int linecount;
+//extern char text[MAX_LINES][MAX_LENGTH];
+//extern int linecount;
 
-void displaytext ();
-void find (char text[][max_chr],int linecount);
-void wordcounter (char text[][max_chr], int linecount);
-void wraptext(char text[][max_chr], int linecount);
+void displaytext (char text[][MAX_LENGTH], int linecount);
+void find (char text[][MAX_LENGTH],int linecount);
+void wordcounter (char text[][MAX_LENGTH], int linecount);
+void wraptext(char text[][MAX_LENGTH], int linecount);
 
 #endif
