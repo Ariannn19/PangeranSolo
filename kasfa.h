@@ -1,6 +1,6 @@
 #ifndef kasfa_H
 #define kasfa_H
-#define MAX_LINES 1000
+#define MAX_LINES 100
 #define MAX_LENGTH 100
 
 //extern char text[MAX_LINES][MAX_LENGTH];

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "kasfa.h"
-#define max_wrap 10
+#define max_wrap 20
 
 //int linecount = 0;
 void displaytext(char text[][MAX_LENGTH], int linecount){
