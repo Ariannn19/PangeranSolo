@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "kasfa.h"
-#define max_wrap 10
+#define max_wrap 20
 
 //int linecount = 0;
 void displaytext(char text[][MAX_LENGTH], int linecount){
@@ -18,8 +18,14 @@ void find (char text[][MAX_LENGTH],int linecount){
     int i;
 
     printf("masukan kata yang ingin kamu cari: ");
+    fflush(stdin);
     fgets(keyword,sizeof(keyword),stdin);
     keyword[strcspn(keyword, "\n")] = 0;
+
+    if(strlen(keyword) == 0){
+        printf("Keyword tidak boleh kosong!\n");
+        return;
+    }
 
     i = 0;
     while(i < linecount){
@@ -80,8 +86,8 @@ void wraptext(char text[][MAX_LENGTH], int linecount){
                 }
 
                 if(k > awal){
-                akhir = k;
-            }
+                    akhir = k;
+                }
             }
 
             int j = awal;
@@ -91,11 +97,11 @@ void wraptext(char text[][MAX_LENGTH], int linecount){
             }
             printf("\n");
 
-            if(text[i][akhir] == ' '){
-                 awal = akhir + 1;
-            } else {
-                 awal = akhir;
-            }               
+            awal = akhir;
+
+            while(text[i][awal] == ' '){
+                awal++;
+            }
         }
         i++;
     }
