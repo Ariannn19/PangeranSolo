@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define MAX_LINES 300
+#define MAX_LINES 100
 #define MAX_LENGTH 100
 
 extern int cursorX, cursorY;
