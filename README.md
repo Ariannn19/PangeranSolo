@@ -1,24 +1,73 @@
-"# PangeranSolo" 
-#Cara setup 
-1. install aplikasi visual studio code
-2. install ekstensi c di visual studio code
-2. install mingw64 untuk menjadi compailer bahasa C
-3. clone repoitori github Pangeransolo: https://github.com/Ariannn19/PangeranSolo
+# 👑 PangeranSolo
 
-#instalisasi
-1. buka terminal di visual studio code
-2. 
-#cara pakai
+## 📌 Deskripsi
 
+PangeranSolo adalah program text editor sederhana berbasis bahasa C yang berjalan di terminal.
+Program ini mendukung fitur dasar seperti pengetikan teks, navigasi kursor, serta fitur tambahan seperti pencarian kata, word counter, dan wrap text.
 
-#identitas
-Nama: Muhammad Rasya Ikram Annasafy 
-NIM:251511053
-Git Id: Raynar726
-Nama: Arian Dwi Putra 
-NIM:251511034
-Git Id: Ariannn19
-Nama: Kasfa Rakha Faza
-NIM:251511044
-Git Id: kasfaRF13
-Manager: Yudi Widhiyasana, S.Si., MT
+---
+
+## ⚙️ Cara Setup
+
+1. Install **Visual Studio Code**
+2. Install ekstensi **C/C++**
+3. Install **MinGW64** sebagai compiler
+4. Clone repository:
+   ```
+   git clone https://github.com/Ariannn19/PangeranSolo
+   ```
+---
+
+## 💻 Instalasi
+
+1. Buka terminal di Visual Studio Code
+2. Masuk ke folder project:
+   ```
+   cd PangeranSolo
+   ```
+3. Compile program:
+   ```
+  gcc *.c -o main
+   ```
+4. Jalankan program:
+   ```
+   ./main.exe
+   ```
+
+---
+
+## 🎮 Cara Pakai
+
+Setelah program dijalankan, kamu bisa langsung mengetik seperti menggunakan text editor.
+
+### ✏️ Kontrol Dasar
+
+* Ketik huruf/angka → menambahkan teks
+* Enter → membuat baris baru
+* Backspace → menghapus karakter sebelum kursor
+* Delete → menghapus karakter pada posisi kursor
+* Tombol panah (↑ ↓ ← →) → menggerakkan kursor
+
+---
+
+## ⌨️ Shortcut
+
+* ↑ ↓ ← → : Navigasi teks
+* Ctrl + S : Save
+* Ctrl + L : Load
+* Ctrl + Z : Undo
+* Ctrl + Y : Redo
+* Ctrl + F : Cari kata (Find)
+* Ctrl + W : Word Counter
+* Ctrl + R : Wrap Text
+* ESC : Keluar dari editor
+
+---
+
+## 👨‍💻 Tim Pengembang
+
+* **Muhammad Rasya Ikram Annasafy** (251511053) - Raynar726
+* **Arian Dwi Putra** (251511034) - Ariannn19
+* **Kasfa Rakha Faza** (251511044) - kasfaRF13
+
+👨‍🏫 Manager: Yudi Widhiyasana, S.Si., MT
