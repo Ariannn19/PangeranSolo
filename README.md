@@ -20,6 +20,8 @@ Program ini mendukung fitur dasar seperti pengetikan teks, navigasi kursor, sert
 
 ## 💻 Instalasi
 
+## 💻 Instalasi
+
 1. Buka terminal di Visual Studio Code
 2. Masuk ke folder project:
    ```
@@ -27,7 +29,7 @@ Program ini mendukung fitur dasar seperti pengetikan teks, navigasi kursor, sert
    ```
 3. Compile program:
    ```
-  gcc *.c -o main
+   gcc *.c -o main
    ```
 4. Jalankan program:
    ```
