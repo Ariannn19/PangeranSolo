@@ -1,21 +1,30 @@
 #ifndef ARIAN_H
 #define ARIAN_H
 
+#include <stdio.h>
+#include <conio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <windows.h>
+
 #define MAX_LINES 100
-#define MAX_LENGTH 256
+#define MAX_LENGTH 100
 
-int inputText(char text[MAX_LINES][MAX_LENGTH], int lines);
+extern int cursorX, cursorY;
+extern int lines;
+extern char text[MAX_LINES][MAX_LENGTH];
 
-void showText(char text[MAX_LINES][MAX_LENGTH], int lines);
+// Core
+void gotoxy(int x, int y);
+void render();
 
-void showClipboard(char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines);
-
-void selectText(int lines, int *start, int *end);
-
-void copyText(char text[MAX_LINES][MAX_LENGTH], int lines, char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines);
-
-int cutText(char text[MAX_LINES][MAX_LENGTH], int lines, char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines);
-
-int pasteText(char text[MAX_LINES][MAX_LENGTH], int lines, char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines);
+// Editor logic
+void moveCursor(int key);
+void insertChar(char ch);
+void backspace();
+void enterKey();
+void deleteChar();
 
 #endif
+
+

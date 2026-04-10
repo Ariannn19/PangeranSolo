@@ -1,30 +1,37 @@
 #include <stdio.h>
 #include <string.h>
 #include "kasfa.h"
-#define max_wrap 10
+#define max_wrap 20
 
-int linecount = 0;
-void displaytext(){
+//int linecount = 0;
+void displaytext(char text[][MAX_LENGTH], int linecount){
     int i = 0;
     while(i < linecount){
         printf("%d: %s\n", i + 1, text[i]);
+        i++;
     }
 }
 
-void find (char text[][max_chr],int linecount){
+void find (char text[][MAX_LENGTH],int linecount){
     char keyword [20];
     int found = 0;
     int i;
 
     printf("masukan kata yang ingin kamu cari: ");
+    fflush(stdin);
     fgets(keyword,sizeof(keyword),stdin);
     keyword[strcspn(keyword, "\n")] = 0;
+
+    if(strlen(keyword) == 0){
+        printf("Keyword tidak boleh kosong!\n");
+        return;
+    }
 
     i = 0;
     while(i < linecount){
 
         if(strstr(text[i], keyword) != NULL){
-            printf("Kata ada di baris ke %d: %s\n",i + 1, keyword);
+            printf("Kata ada di baris ke %d: %s\n",i + 1, text[i]);
             found = 1;
         }
 
@@ -36,7 +43,7 @@ void find (char text[][max_chr],int linecount){
         }
 }
 
-void wordcounter (char text[][max_chr], int linecount){
+void wordcounter (char text[][MAX_LENGTH], int linecount){
     int totalchr = 0;
     int totalkata = 0;
 
@@ -60,7 +67,7 @@ void wordcounter (char text[][max_chr], int linecount){
     printf("\nJumlah karakter: %d", totalchr);
 }
 
-void wraptext(char text[][max_chr], int linecount){
+void wraptext(char text[][MAX_LENGTH], int linecount){
     int i = 0;
     while(i < linecount){
         int len = strlen(text[i]);
@@ -79,8 +86,8 @@ void wraptext(char text[][max_chr], int linecount){
                 }
 
                 if(k > awal){
-                akhir = k;
-            }
+                    akhir = k;
+                }
             }
 
             int j = awal;
@@ -90,7 +97,11 @@ void wraptext(char text[][max_chr], int linecount){
             }
             printf("\n");
 
-            awal = akhir + 1;
+            awal = akhir;
+
+            while(text[i][awal] == ' '){
+                awal++;
+            }
         }
         i++;
     }

@@ -2,6 +2,10 @@
 #include "arian.h"
 #include "kasfa.h"
 
+char text[MAX_LINES][MAX_LENGTH];
+int linecount = 0;
+
+
 int main(){
     int choice;
 
@@ -20,7 +24,7 @@ int main(){
             inputText(text, linecount);
             break;
         case 2:
-            displaytext();
+            displaytext(text, linecount);
         
         }
     }while(choice != 3);
