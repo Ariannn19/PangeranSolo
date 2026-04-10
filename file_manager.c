@@ -2,24 +2,24 @@
 #include <string.h>
 #include "file_manager.h"
 
-void save_ke_file(char filename[], char kertas [100][50], int jumlah_baris) 
+void save_ke_file(char filename[], char kertas [100][100], int jumlah_baris) 
 {
-    FILE *file = fopen(filename, "w");
+    FILE *file = fopen(filename, "w"); // Membuka file untuk ditulis
 
-    if (file == NULL)
+    if (file == NULL)   
     {
         printf("Gagal membuka file untuk disimpan.\n");
         return;
     }
 
     for(int i = 0; i < jumlah_baris; i++) {
-        fprintf(file, "%s\n", kertas[i]);
+        fprintf(file, "%s\n", kertas[i]); 
     }
 
     fclose(file);
 }
 
-int load_dari_file(char filename[], char kertas [100][50]) 
+int load_dari_file(char filename[], char kertas [100][100]) 
 {
     FILE *file = fopen(filename, "r");
 
@@ -29,12 +29,12 @@ int load_dari_file(char filename[], char kertas [100][50])
         return 0;
     }
 
-    char buffer[50];
+    char buffer[100];
     int jumlah_baris = 0;
 
     while(fgets(buffer, sizeof(buffer), file) != NULL && jumlah_baris < 100) {
         buffer[strcspn(buffer, "\n")] = '\0'; // Menghapus newline
-        strncpy(kertas[jumlah_baris], buffer, 50);
+        strncpy(kertas[jumlah_baris], buffer, 99);
         jumlah_baris++;
     }
 
