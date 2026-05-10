@@ -1,7 +1,6 @@
 #include "kasfa.h"
 #include "arian.h"
-#include "file_manager.h"
-#include "undo_redo.h"
+#include "rasya.h"
 
 stack riwayat; // Mendeklarasikan stack untuk menyimpan riwayat (undo/redo)
 
