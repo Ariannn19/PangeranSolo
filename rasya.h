@@ -1,5 +1,5 @@
-#ifndef undo_redo_h
-#define undo_redo_h
+#ifndef RASYA_H
+#define RASYA_H
 
 typedef struct {
     char riwayat_kertas[100][100][100];
@@ -7,6 +7,9 @@ typedef struct {
     int top;
     int max_top;
 } stack;
+
+void save_ke_file(char filename[], char kertas [100][100], int jumlah_baris);
+int load_dari_file(char filename[], char kertas [100][100]);
 
 void init_stack(stack *s);
 void push(stack *s, char kertas_sekarang[100][100], int jumlah_baris);
