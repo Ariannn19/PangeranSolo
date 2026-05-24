@@ -7,23 +7,36 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define MAX_LINES 100
-#define MAX_LENGTH 100
+#define MAX_KOLOM 80
 
-extern int cursorX, cursorY;
-extern int lines;
-extern char text[MAX_LINES][MAX_LENGTH];
+typedef struct Line {
+    char info[MAX_KOLOM];
+    int len;
+    struct Line* next;
+    struct Line* prev;
+} Line;
 
-// Core
-void gotoxy(int x, int y);
-void render();
+typedef struct {
+    Line* currentLine;
+    int kursorX;
+} Kursor;
 
-// Editor logic
+Line* head;
+Line* tail;
+Kursor kursor;
+
+Line* buatBaris();
+void initEditor();
 void moveCursor(int key);
-void insertChar(char ch);
+void insertChar(char c);
 void backspace();
-void enterKey();
+void enter();
 void deleteChar();
+void tampilkanTeks();
+void bersihkanMemori();
+void gotoxy(int x, int y);
+void hideCursor();
+void showCursor();
 
 #endif
 

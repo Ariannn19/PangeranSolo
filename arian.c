@@ -1,248 +1,183 @@
 #include "arian.h"
 
-int cursorX = 0;
-int cursorY = 0;
-int lines = 1;
-char text[MAX_LINES][MAX_LENGTH] = {0};
+Line* head = NULL;
+Line* tail = NULL;
+Kursor kursor;
 
-// Mengatur posisi kursor pada koordinat (x, y) di layar konsol
 void gotoxy(int x, int y) {
-    COORD c = {x, y};
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-// Membersihkan layar terminal dan mencetak seluruh teks yang ada di array
-void render() {
-    system("cls");
-    // Mencetak setiap baris teks yang ada
-    for (int i = 0; i < lines; i++) 
-    {
-        gotoxy(0, i);
-        printf("%s", text[i]);
-    }
-    // Mencegah kursor melewati batas atas atau bawah jumlah baris
-    if (cursorY >= lines) 
-    {
-        cursorY = lines - 1;
-    }
-    if (cursorY < 0) 
-    {
-        cursorY = 0;
-    }
-    // Mencegah kursor melewati panjang teks pada baris saat ini
-    int len = strlen(text[cursorY]);
-    if (cursorX > len) 
-    {
-        cursorX = len;
-    }
-    if (cursorX < 0) 
-    {
-    cursorX = 0;
-    }
-    // Mengembalikan kursor ke posisi aktif
-    gotoxy(cursorX, cursorY);
+void hideCursor() {
+    CONSOLE_CURSOR_INFO cursorInfo;
+    cursorInfo.dwSize = 20;    
+    cursorInfo.bVisible = FALSE; // Sembunyikan
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
-// Memproses pergerakan kursor menggunakan tombol arrow
-void moveCursor(int key) {
-    int len = strlen(text[cursorY]);
-    int newLen;
-    if (key == 72) { // Panah Atas
-        if (cursorY > 0) {
-            cursorY--;
-            // Sesuaikan posisi X jika baris di atasnya lebih pendek
-            newLen = strlen(text[cursorY]);
-            if (cursorX > newLen) cursorX = newLen;
-        }
-    }
-    else if (key == 80) { // Panah Bawah
-        if (cursorY < lines - 1) {
-            cursorY++;
-            // Sesuaikan posisi X jika baris di bawahnya lebih pendek
-            newLen = strlen(text[cursorY]);
-            if (cursorX > newLen) cursorX = newLen;
-        }
-    }
-    else if (key == 75) { // Panah Kiri
-        if (cursorX > 0) {
-            cursorX--;
-        }
-        else if (cursorY > 0) {
-            // Pindah ke akhir baris sebelumnya jika sudah berada di ujung kiri
-            cursorY--;
-            cursorX = strlen(text[cursorY]);
-        }
-    }
-    else if (key == 77) { // Panah Kanan
-        if (cursorX < len) {
-            cursorX++;
-        }
-        else if (cursorY < lines - 1) {
-            // Pindah ke awal baris selanjutnya jika kursor sudah berada di ujung kanan
-            cursorY++;
-            cursorX = 0;
-        }
-    }
+void showCursor() {
+    CONSOLE_CURSOR_INFO cursorInfo;
+    cursorInfo.dwSize = 20;
+    cursorInfo.bVisible = TRUE;  // Munculkan
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
-// Menambahkan karakter baru pada posisi kursor saat ini
-void insertChar(char ch) {
-    int len = strlen(text[cursorY]);
-    // Pastikan posisi kursor valid sebelum menyisipkan karakter
-    if (cursorX > len){
-        cursorX = len;
+Line* buatBaris() {
+    Line* barisBaru = (Line*)malloc(sizeof(Line));
+    if (barisBaru == NULL) {
+        printf("Gagal alokasi memori");
+        exit(1);
     }
-    // Kondisi 1: Baris saat ini masih memiliki kapasitas
-    if (len < MAX_LENGTH - 1) {
-        // Geser sisa teks ke kanan untuk memberikan ruang bagi karakter baru
-        for (int i = len; i >= cursorX; i--) {
-            text[cursorY][i + 1] = text[cursorY][i];
-        }
-        text[cursorY][cursorX] = ch;
-        cursorX++;
+    barisBaru->info[0] = '\0';
+    barisBaru->len = 0;
+    barisBaru->next = NULL;
+    barisBaru->prev = NULL;
+    return barisBaru;
+}
+
+void initEditor() {
+    Line* firstLine = buatBaris();
+    head = tail = firstLine;
+    kursor.currentLine = firstLine;
+    kursor.kursorX = 0;
+}
+
+void insertChar(char c) {
+    Line* curr = kursor.currentLine;
+    if (curr->len >= MAX_KOLOM - 1) {
         return;
     }
-
-    // Kondisi 2: Baris penuh, lakukan pergeseran karakter ke baris berikutnya
-    char currentChar = ch;
-    int currentY = cursorY;
-    int insertX = cursorX;
-    while (currentY < MAX_LINES - 1) {
-        // Tambahkan baris baru jika diperlukan
-        if (currentY >= lines) {
-            lines++;
-        }
-
-        int currentLen = strlen(text[currentY]);
-
-        // Jika baris tujuan memiliki ruang, sisipkan karakter dan hentikan pergeseran
-        if (currentLen < MAX_LENGTH - 1) {
-            for (int i = currentLen; i >= insertX; i--) {
-                text[currentY][i + 1] = text[currentY][i];
-            }
-            text[currentY][insertX] = currentChar;
-            break;
-        }
-        // Simpan karakter paling kanan yang akan terdorong ke bawah
-        char overflowChar = text[currentY][MAX_LENGTH - 2];
-
-        // Geser teks ke kanan untuk Menambahkan karakter saat ini
-        for (int i = MAX_LENGTH - 2; i > insertX; i--) 
-        {
-            text[currentY][i] = text[currentY][i - 1];
-        }
-        text[currentY][insertX] = currentChar;
-        // Pastikan baris tetap diakhiri dengan null terminator
-        text[currentY][MAX_LENGTH - 1] = '\0';
-        // Lanjutkan proses ke baris di bawahnya
-        currentY++;
-        currentChar = overflowChar;
-        insertX = 0;
+    for (int i = curr->len; i >= kursor.kursorX; i--) {
+        curr->info[i + 1] = curr->info[i];
     }
-    // Perbarui posisi kursor setelah pengetikan
-    if (cursorX < MAX_LENGTH - 1) 
-    {
-        cursorX++;
-    } 
-    else 
-    {
-        cursorX = 0;
-        if (cursorY < lines - 1) cursorY++;
-    }
+    curr->info[kursor.kursorX] = c;
+    curr->len++;
+    kursor.kursorX++;
 }
 
-// Menghapus karakter pada posisi kursor dan menarik sisa teks ke kiri
-void deleteChar() {
-    int len = strlen(text[cursorY]);
-
-    if (cursorX < len) {
-        // Geser karakter di sebelah kanan kursor ke arah kiri
-        for (int i = cursorX; i < len; i++) {
-            text[cursorY][i] = text[cursorY][i + 1];
-        }
-    }
-    else if (cursorY < lines - 1) 
-    {
-        // Jika kursor berada di akhir baris, tarik teks dari baris bawahnya
-        int currLen = len;
-        int nextLen = strlen(text[cursorY + 1]);
-        int spaceLeft = MAX_LENGTH - 1 - currLen;
-        // Tentukan jumlah karakter yang dapat dipindahkan ke atas
-        int copyCount;
-        if (nextLen > spaceLeft) 
-        {
-            copyCount = spaceLeft;
-        } 
-        else 
-        {
-            copyCount = nextLen;
-        }
-
-        // Salin karakter yang muat ke ujung baris saat ini
-        if (copyCount > 0) 
-        {
-            strncpy(&text[cursorY][currLen], text[cursorY + 1], copyCount);
-            text[cursorY][currLen + copyCount] = '\0';
-        }
-
-        // Jika baris bawah masih memiliki sisa karakter, geser ke awal baris tersebut
-        if (nextLen > copyCount) 
-        {
-            for (int i = 0; i < nextLen - copyCount; i++) 
-            {
-                text[cursorY + 1][i] = text[cursorY + 1][copyCount + i];
-            }
-            text[cursorY + 1][nextLen - copyCount] = '\0';
-        } 
-        else 
-        {
-            // Jika baris bawah habis ditarik, geser semua baris di bawahnya ke atas
-            for (int i = cursorY + 1; i < lines - 1; i++)
-            strcpy(text[i], text[i + 1]);
-            text[lines - 1][0] = '\0';
-            lines--; 
-        }
-    }
-}
-
-// Menghapus karakter di belakang kursor
 void backspace() {
-    // Jika kursor tidak di awal baris, mundur satu langkah dan hapus karakter
-    if (cursorX > 0) 
-    {
-        cursorX--;       
-        deleteChar();    
+    Line* curr = kursor.currentLine;
+    if (kursor.kursorX == 0) {
+        return;
     }
-    // Jika kursor di awal baris (kecuali baris pertama), gabungkan dengan baris di atasnya
-    else if (cursorY > 0) 
-    { 
-        cursorX = strlen(text[cursorY - 1]); 
-        cursorY--;                           
-        deleteChar();                        
+    for (int i = kursor.kursorX - 1; i < curr->len; i++) {
+        curr->info[i] = curr->info[i + 1];
+    }
+    curr->len--;
+    kursor.kursorX--;
+}
+
+void delete() {
+    Line* curr = kursor.currentLine;
+    if (kursor.kursorX == curr->len) {
+        return;
+    }
+    for (int i = kursor.kursorX; i < curr->len; i++) {
+        curr->info[i] = curr->info[i + 1];
+    }
+    curr->len--;
+}
+
+void enter() {
+    Line* curr = kursor.currentLine;
+    Line* barisBaru = buatBaris();
+
+    strncpy(barisBaru->info, curr->info + kursor.kursorX, MAX_KOLOM - 1);
+    barisBaru->info[MAX_KOLOM - 1] = '\0';
+    barisBaru->len = strlen(barisBaru->info);
+
+    curr->info[kursor.kursorX] = '\0';
+    curr->len = kursor.kursorX;
+    
+    barisBaru->next = curr->next; 
+    barisBaru->prev = curr;
+    
+    if (curr->next != NULL) {
+        curr->next->prev = barisBaru;
+    }
+    curr->next = barisBaru;
+    
+    if (tail == curr) {
+        tail = barisBaru;
+    }
+    
+    kursor.currentLine = barisBaru;
+    kursor.kursorX = 0;
+}
+
+void moveCursor(int key) {
+    switch (key) {
+        case 75: /* Kiri */
+            if (kursor.kursorX > 0) {
+                kursor.kursorX--;
+            }
+            break; 
+
+        case 77: /* Kanan */
+            if (kursor.kursorX < kursor.currentLine->len) {
+                kursor.kursorX++;
+            }
+            break;
+
+        case 72: /* Atas */
+            if (kursor.currentLine->prev != NULL) {
+                kursor.currentLine = kursor.currentLine->prev;
+                if (kursor.kursorX > kursor.currentLine->len) {
+                    kursor.kursorX = kursor.currentLine->len;
+                }
+            }
+            break;
+
+        case 80: /* Bawah */
+            if (kursor.currentLine->next != NULL) {
+                kursor.currentLine = kursor.currentLine->next;
+                if (kursor.kursorX > kursor.currentLine->len) {
+                    kursor.kursorX = kursor.currentLine->len;
+                }
+            }
+            break;
     }
 }
 
-// Fungsi Enter
-void enterKey() {
-    // Abaikan jika jumlah baris telah mencapai batas maksimal
-    if (lines >= MAX_LINES) return;
-
-    // Simpan sisa teks di sebelah kanan kursor untuk dipindahkan
-    char temp[MAX_LENGTH];
-    strcpy(temp, &text[cursorY][cursorX]);
-    text[cursorY][cursorX] = '\0'; 
-
-    // Geser baris di bawahnya ke bawah untuk memberi ruang
-    for (int i = lines; i > cursorY; i--) 
-    {
-        strcpy(text[i], text[i - 1]);
+void bersihkanMemori() {
+    Line* curr = head;
+    Line* Hapus;
+    
+    while (curr != NULL) {
+        Hapus = curr;          
+        curr = curr->next; 
+        free(Hapus);               
     }
+    head = NULL;
+    tail = NULL;
+    kursor.currentLine = NULL;
+}
+
+void tampilkanTeks() {
+    hideCursor();
+    gotoxy(0, 0);
     
-    // Letakkan sisa teks yang disimpan ke baris yang baru
-    strcpy(text[cursorY + 1], temp);
+    Line* temp = head;
+    int indexBaris = 0;
+    int targetBaris = 0;
     
-    // Perbarui jumlah baris dan pindahkan kursor ke awal baris baru
-    lines++;
-    cursorY++;
-    cursorX = 0; 
+    while (temp != NULL) {
+        printf("%s", temp->info);
+        for (int i = temp->len; i < MAX_KOLOM; i++) {
+            printf(" ");
+        }
+        
+        if (temp == kursor.currentLine) {
+            targetBaris = indexBaris;
+        }
+        printf("\n");
+
+        temp = temp->next;
+        indexBaris++;
+    }
+    gotoxy(kursor.kursorX, targetBaris);
+    showCursor();
 }

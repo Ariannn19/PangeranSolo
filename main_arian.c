@@ -3,8 +3,10 @@
 
 int main() {
     int ch;
+
+    system("cls");
     while (1) {
-        render();
+        tampilkanTeks();
 
         ch = _getch();
 
@@ -14,7 +16,7 @@ int main() {
             ch = _getch();
 
             if (ch == 83) {         // DELETE key
-                deleteChar();
+                delete();
             } else {
                 moveCursor(ch);     // arrow keys: UP/DOWN/LEFT/RIGHT
             }
@@ -23,7 +25,7 @@ int main() {
             backspace();
         }
         else if (ch == 13) {
-            enterKey();
+            enter();
         }
         else {
             insertChar(ch);
