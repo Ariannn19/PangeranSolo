@@ -61,8 +61,34 @@ void insertChar(char c) {
 void backspace() {
     Line* curr = kursor.currentLine;
     if (kursor.kursorX == 0) {
-        return;
+        if (curr->prev == NULL){
+            return;
+        }
+
+        Line* prevLine = curr->prev;
+        
+        if(prevLine->len + curr->len >= MAX_KOLOM -1){
+            return;
+        }
+        
+        int prevLen = prevLine->len;
+        strcat(prevLine->info, curr->info);
+        prevLine->len = prevLine->len + curr->len;
+
+        prevLine->next = curr->next;
+        if (curr->next != NULL){
+            curr->next->prev = prevLine;
+        }
+        if (tail == curr){
+        tail = prevLine;
     }
+    kursor.currentLine = prevLine;
+    kursor.kursorX = prevLen;
+    free(curr);
+    return;
+    }
+
+
     for (int i = kursor.kursorX - 1; i < curr->len; i++) {
         curr->info[i] = curr->info[i + 1];
     }

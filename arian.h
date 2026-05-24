@@ -31,7 +31,7 @@ void moveCursor(int key);
 void insertChar(char c);
 void backspace();
 void enter();
-void deleteChar();
+void delete();
 void tampilkanTeks();
 void bersihkanMemori();
 void gotoxy(int x, int y);
