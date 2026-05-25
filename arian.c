@@ -99,8 +99,30 @@ void backspace() {
 void delete() {
     Line* curr = kursor.currentLine;
     if (kursor.kursorX == curr->len) {
+        if (curr->next == NULL){
+            return;
+        }
+
+        Line* nextLine = curr->next;
+        if(curr->len + nextLine->len >= MAX_KOLOM -1){
+        return;
+        }
+
+        strcat(curr->info, nextLine->info);
+
+        curr->len = curr->len + nextLine->len;
+        curr->next = nextLine->next;
+
+        if(nextLine->next != NULL){
+            nextLine->next->prev = curr;
+        }
+        if (tail == nextLine){
+            tail = curr;
+        }
+        free(nextLine);
         return;
     }
+    
     for (int i = kursor.kursorX; i < curr->len; i++) {
         curr->info[i] = curr->info[i + 1];
     }
@@ -204,6 +226,12 @@ void tampilkanTeks() {
         temp = temp->next;
         indexBaris++;
     }
+    int i = 0;
+    while (i < MAX_KOLOM) {
+    printf(" ");
+    i++;
+    }
+    printf("\n");
     gotoxy(kursor.kursorX, targetBaris);
     showCursor();
 }
