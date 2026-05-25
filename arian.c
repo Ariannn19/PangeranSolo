@@ -58,6 +58,23 @@ void insertChar(char c) {
     kursor.kursorX++;
 }
 
+void gabungBaris(Line* atas, Line* bawah) {
+
+    strcat(atas->info, bawah->info);
+    atas->len = atas->len + bawah->len;
+
+    atas->next = bawah->next;
+
+    if(bawah->next != NULL){
+        bawah->next->prev = atas;
+    }
+
+    if(tail == bawah){
+        tail = atas;
+    }
+
+    free(bawah);
+}
 void backspace() {
     Line* curr = kursor.currentLine;
     if (kursor.kursorX == 0) {
@@ -72,19 +89,9 @@ void backspace() {
         }
         
         int prevLen = prevLine->len;
-        strcat(prevLine->info, curr->info);
-        prevLine->len = prevLine->len + curr->len;
-
-        prevLine->next = curr->next;
-        if (curr->next != NULL){
-            curr->next->prev = prevLine;
-        }
-        if (tail == curr){
-        tail = prevLine;
-    }
+        gabungBaris(prevLine, curr);
     kursor.currentLine = prevLine;
     kursor.kursorX = prevLen;
-    free(curr);
     return;
     }
 
