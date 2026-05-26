@@ -67,3 +67,4 @@ int linecounter(Line *head){
 
     return baris;
 }
+

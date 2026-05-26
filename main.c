@@ -3,6 +3,12 @@
 #include <ctype.h>
 
 void menuCounter() {
+    // Bersihkan area menu dulu
+    for(int i = 22; i <= 29; i++) {
+        gotoxy(0, i);
+        printf("%-79s", " "); // clear baris
+    }
+
     gotoxy(0, 22);
     printf("+=================================+");
     gotoxy(0, 23);
@@ -37,7 +43,6 @@ void menuCounter() {
     _getch();
     tampilkanTeks();
 }
-
 void menuFind() {
     gotoxy(0, 22);
     printf("+=================================+");
