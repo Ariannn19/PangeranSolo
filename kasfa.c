@@ -33,3 +33,26 @@ int wordcounter(Line *head){
 
     return total;
 }
+
+int charcounter(Line *head){
+    Line *temp = head;
+    int total = 0;
+
+    while(temp != NULL){
+        char *kata = temp->info;
+        int i = 0;
+        while(kata[i] != '\0'){
+            total++;
+            i++;
+        }
+
+        //untuk menghitung newline nya
+        if(temp->next != NULL){
+            total++;
+        }
+
+        temp = temp->next;
+    }
+
+    return total;
+}
