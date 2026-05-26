@@ -1,20 +1,18 @@
 #ifndef RASYA_H
 #define RASYA_H
+#include "arian.h"
 
-typedef struct {
-    char riwayat_kertas[100][100][100];
-    int riwayat_baris[100];
-    int top;
-    int max_top;
-} stack;
+typedef struct RiwayatNode {
+    Line *kertas_head;
+    struct RiwayatNode* next;  // Pointer ke node berikutnya
+    struct RiwayatNode* prev;  // Pointer ke node sebelumnya
+} RiwayatNode;
 
-void save_ke_file(char filename[], char kertas [100][100], int jumlah_baris);
-int load_dari_file(char filename[], char kertas [100][100]);
+void save_ke_file(char filename[], Line* head);   
+Line* load_dari_file(char filename[]);
 
-void init_stack(stack *s);
-void push(stack *s, char kertas_sekarang[100][100], int jumlah_baris);
-void pop(stack *s, char kertas_tujuan[100][100], int *jumlah_baris_tujuan);
-void redo(stack *s, char kertas_tujuan[100][100], int *jumlah_baris_tujuan);
-int is_empty(stack *s);
+void push_riwayat(RiwayatNode **current_state, Line *kertas_sekarang);
+Line* undo(RiwayatNode **current_state);
+Line* redo(RiwayatNode **current_state);
 
 #endif
