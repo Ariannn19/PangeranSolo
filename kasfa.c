@@ -56,3 +56,13 @@ int charcounter(Line *head){
 
     return total;
 }
+
+int linecounter(Line *head){
+    int baris = 0;
+    while(head != NULL){
+        baris++;
+        head = head->next;
+    }
+
+    return baris;
+}

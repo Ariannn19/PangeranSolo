@@ -6,5 +6,6 @@
 void find(Line *head,char keyword[]);
 int wordcounter(Line *head);
 int charcounter(Line *head);
+int linecounter(Line *head);
 
 #endif
