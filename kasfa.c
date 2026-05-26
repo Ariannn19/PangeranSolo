@@ -3,22 +3,12 @@
 #include "kasfa.h"
 #define max_wrap 20
 
-//int linecount = 0;
-void displaytext(char text[][MAX_LENGTH], int linecount){
-    int i = 0;
-    while(i < linecount){
-        printf("%d: %s\n", i + 1, text[i]);
-        i++;
-    }
-}
-
 void find (char text[][MAX_LENGTH],int linecount){
     char keyword [20];
     int found = 0;
     int i;
 
     printf("masukan kata yang ingin kamu cari: ");
-    fflush(stdin);
     fgets(keyword,sizeof(keyword),stdin);
     keyword[strcspn(keyword, "\n")] = 0;
 
