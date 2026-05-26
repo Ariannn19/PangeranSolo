@@ -1,21 +1,43 @@
 #ifndef ARIAN_H
 #define ARIAN_H
 
-#define MAX_LINES 1000
-#define MAX_LENGTH 100
+#include <stdio.h>
+#include <conio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <windows.h>
 
-int inputText(char text[MAX_LINES][MAX_LENGTH], int lines);
+#define MAX_KOLOM 80
 
-void showText(char text[MAX_LINES][MAX_LENGTH], int lines);
+typedef struct Line {
+    char info[MAX_KOLOM];
+    int len;
+    struct Line* next;
+    struct Line* prev;
+} Line;
 
-void showClipboard(char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines);
+typedef struct {
+    Line* currentLine;
+    int kursorX;
+} Kursor;
 
-void selectText(int lines, int *start, int *end);
+Line* head;
+Line* tail;
+Kursor kursor;
 
-void copyText(char text[MAX_LINES][MAX_LENGTH], int lines, char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines);
-
-int cutText(char text[MAX_LINES][MAX_LENGTH], int lines, char clipboard[MAX_LINES][MAX_LENGTH], int *clip_lines);
-
-int pasteText(char text[MAX_LINES][MAX_LENGTH], int lines, char clipboard[MAX_LINES][MAX_LENGTH], int clip_lines);
+Line* buatBaris();
+void initEditor();
+void moveCursor(int key);
+void insertChar(char c);
+void backspace();
+void enter();
+void delete();
+void tampilkanTeks();
+void bersihkanMemori();
+void gotoxy(int x, int y);
+void hideCursor();
+void showCursor();
 
 #endif
+
+
