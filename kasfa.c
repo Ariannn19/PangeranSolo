@@ -14,3 +14,22 @@ void find(Line *head,char keyword[]){
 
     printf("Find selesai\n");
 }
+
+int wordcounter(Line *head){
+    Line *temp= head;
+    int total = 0;
+
+    while(temp != NULL){
+        char *kata = temp->info;
+        int i = 0;
+        while(kata[i] != '\0'){
+            if((!isspace(kata[i]) && (i == 0 || isspace(kata[i - 1])))){
+                total++;
+            }
+            i++;
+        }
+        temp = temp->next;
+    }
+
+    return total;
+}
