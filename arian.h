@@ -21,9 +21,9 @@ typedef struct {
     int kursorX;
 } Kursor;
 
-Line* head;
-Line* tail;
-Kursor kursor;
+extern Line* head;
+extern Line* tail;
+extern Kursor kursor;
 
 Line* buatBaris();
 void initEditor();
