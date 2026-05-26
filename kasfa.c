@@ -5,7 +5,7 @@
 void find(Line *head,char keyword[]){
     int baris = 1;
     while(head != NULL){
-        if(strstr(head->info,keyword) == 0){
+        if(strstr(head->info,keyword) != NULL){
             printf("Kata ditemukan pada baris %d: %s\n",baris,head->info);
         }
         head = head->next;

@@ -1,33 +1,92 @@
-#include<stdio.h>
 #include "arian.h"
 #include "kasfa.h"
+#include <ctype.h>
 
-int linecount = 0;
+void menuCounter() {
+    gotoxy(0, 22);
+    printf("+=================================+");
+    gotoxy(0, 23);
+    printf("| [1] Word  [2] Char  [3] Line   |");
+    gotoxy(0, 24);
+    printf("| [ESC] Batal                    |");
+    gotoxy(0, 25);
+    printf("+=================================+");
+    gotoxy(0, 26);
+    printf("Pilih: ");
 
+    int pilih = _getch();
 
-int main(){
-    int choice;
-
-    do{
-        printf("======PangeranSolo======");
-        printf("1. Input Text ");
-        printf("2. Display text ");
-        printf("3. Exit");
-
-        printf("pilih: ");
-        scanf("%d", choice);
-
-        switch (choice)
-        {
-        case 1:
-            
+    gotoxy(0, 27);
+    switch (pilih) {
+        case '1':
+            printf("Total kata  : %d", wordcounter(head));
             break;
-        case 2:
-            
-        
-        }
-    }while(choice != 3);
+        case '2':
+            printf("Total char  : %d", charcounter(head));
+            break;
+        case '3':
+            printf("Total baris : %d", linecounter(head));
+            break;
+        default:
+            tampilkanTeks();
+            return;
+    }
 
-    return 0;
+    gotoxy(0, 28);
+    printf("Tekan sembarang tombol...");
+    _getch();
+    tampilkanTeks();
 }
 
+void menuFind() {
+    gotoxy(0, 22);
+    printf("+=================================+");
+    gotoxy(0, 23);
+    printf("| FIND                           |");
+    gotoxy(0, 24);
+    printf("+=================================+");
+    gotoxy(0, 25);
+    printf("Cari kata: ");
+
+    showCursor();
+    char keyword[MAX_KOLOM];
+    scanf("%79s", keyword);     // max sesuai MAX_KOLOM
+    hideCursor();
+
+    gotoxy(0, 26);
+    find(head, keyword);        // hasil tampil di sini ke bawah
+
+    gotoxy(0, 30);
+    printf("Tekan sembarang tombol...");
+    _getch();
+    tampilkanTeks();
+}
+
+int main() {
+    initEditor();
+    tampilkanTeks();
+
+    int c;
+    while (1) {
+        c = _getch();
+
+        if (c == 0 || c == 224) {
+            int next = _getch();
+            if (next == 83) delete();       // Delete key
+            else moveCursor(next);          // Arrow keys
+        }
+        else if (c == 8)  backspace();      // Backspace
+        else if (c == 13) enter();          // Enter
+        else if (c == 27) break;            // ESC keluar
+        else if (c == 6)  menuFind();       // Ctrl+F
+        else if (c == 23) menuCounter();    // Ctrl+W
+        else if (c >= 32 && c <= 126) {
+            insertChar((char)c);
+        }
+
+        tampilkanTeks();
+    }
+
+    bersihkanMemori();
+    return 0;
+}
