@@ -47,16 +47,71 @@ void initEditor() {
 
 void insertChar(char c) {
     Line* curr = kursor.currentLine;
-    if (curr->len >= MAX_KOLOM - 1) {
-        return;
-    }
-    for (int i = curr->len; i >= kursor.kursorX; i--) {
+    if (curr->len < MAX_KOLOM - 1) {
+        for (int i = curr->len; i >= kursor.kursorX; i--) {
         curr->info[i + 1] = curr->info[i];
+        }        
+        curr->info[kursor.kursorX] = c;
+        curr->len++;
+        kursor.kursorX++;
+
+        curr->info[curr->len] = '\0';
     }
-    curr->info[kursor.kursorX] = c;
-    curr->len++;
-    kursor.kursorX++;
+    else{
+        char overflowChar;
+        if (kursor.kursorX == curr->len){
+            overflowChar = c;
+            curr->info[MAX_KOLOM -1] = '\0';
+        }
+        else {
+            overflowChar = curr->info[curr->len - 1];
+            int i = curr->len - 1; 
+            while (i > kursor.kursorX){
+                curr->info[i] = curr->info[i - 1];
+                i--;
+            }
+            curr->info[kursor.kursorX] = c;
+            kursor.kursorX++;
+        }
+        wrapChar(curr, overflowChar);
+        if (kursor.kursorX >= MAX_KOLOM -1){
+            kursor.currentLine = curr->next;
+            kursor.kursorX = 1;
+        }
+    }
+
 }
+
+void wrapChar(Line* curr, char overflowChar) {
+    if (curr->next == NULL) {
+        Line* newLine = buatBaris();
+        newLine->prev = curr;
+        curr->next = newLine;
+        if(tail == curr){
+            tail = newLine;
+        }
+    }
+    Line* nextLine = curr->next;
+
+    if (nextLine->len >= MAX_KOLOM -1){
+        char nextOverflow = nextLine->info[nextLine->len - 1];
+
+        for (int i = nextLine->len - 1; i > 0; i--) {
+            nextLine->info[i] = nextLine->info[i - 1];
+        }
+        nextLine->info[0] = overflowChar;
+
+        wrapChar(nextLine, nextOverflow);
+    }
+    else{
+        for (int i = nextLine->len; i >= 0; i--) {
+            nextLine->info[i + 1] = nextLine->info[i];
+        }
+        nextLine->info[0] = overflowChar;
+        nextLine->len++;
+    }
+}
+
 
 void gabungBaris(Line* atas, Line* bawah) {
 
@@ -81,26 +136,9 @@ void backspace() {
         if (curr->prev == NULL){
             return;
         }
-
-        Line* prevLine = curr->prev;
-        
-        if(prevLine->len + curr->len >= MAX_KOLOM -1){
-            return;
-        }
-        
-        int prevLen = prevLine->len;
-        gabungBaris(prevLine, curr);
-    kursor.currentLine = prevLine;
-    kursor.kursorX = prevLen;
-    return;
     }
-
-
-    for (int i = kursor.kursorX - 1; i < curr->len; i++) {
-        curr->info[i] = curr->info[i + 1];
-    }
-    curr->len--;
-    kursor.kursorX--;
+    moveCursor(75);
+    delete();
 }
 
 void delete() {
@@ -111,29 +149,45 @@ void delete() {
         }
 
         Line* nextLine = curr->next;
-        if(curr->len + nextLine->len >= MAX_KOLOM -1){
-        return;
+        if (nextLine->len == 0) {
+            curr->next = nextLine->next;
+            if (nextLine->next != NULL) nextLine->next->prev = curr;
+            if (tail == nextLine) tail = curr;
+            free(nextLine);
+            return;
+        }        
+        if(curr->len + nextLine->len <= MAX_KOLOM -1){
+            gabungBaris(curr, nextLine);
+            return;
         }
+        
+        curr->info[curr->len] = nextLine->info[0];
+        curr->len++;
+        curr->info[curr->len] = '\0';
 
-        strcat(curr->info, nextLine->info);
-
-        curr->len = curr->len + nextLine->len;
-        curr->next = nextLine->next;
-
-        if(nextLine->next != NULL){
-            nextLine->next->prev = curr;
+        for (int i = 0; i < nextLine->len - 1; i++) {
+            nextLine->info[i] = nextLine->info[i + 1];
         }
-        if (tail == nextLine){
-            tail = curr;
+        nextLine->len--;
+        nextLine->info[nextLine->len] = '\0';
+
+        if(nextLine->len == 0){
+            curr->next = nextLine->next;
+            if(nextLine->next != NULL){
+                nextLine->next->prev = curr;
+            }
+            if (tail == nextLine){
+                tail = curr;
+            }
+            free(nextLine);
         }
-        free(nextLine);
         return;
     }
-    
     for (int i = kursor.kursorX; i < curr->len; i++) {
         curr->info[i] = curr->info[i + 1];
     }
     curr->len--;
+    curr->info[curr->len] = '\0';
 }
 
 void enter() {
@@ -169,11 +223,19 @@ void moveCursor(int key) {
             if (kursor.kursorX > 0) {
                 kursor.kursorX--;
             }
+            else if (kursor.currentLine->prev != NULL) {
+                kursor.currentLine = kursor.currentLine->prev;
+                kursor.kursorX = kursor.currentLine->len;
+            }
             break; 
 
         case 77: /* Kanan */
             if (kursor.kursorX < kursor.currentLine->len) {
                 kursor.kursorX++;
+            }
+            else if (kursor.currentLine->next != NULL) {
+                kursor.currentLine = kursor.currentLine->next;
+                kursor.kursorX = 0;
             }
             break;
 
