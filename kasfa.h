@@ -8,5 +8,6 @@ int wordcounter(Line *head);
 int charcounter(Line *head);
 int linecounter(Line *head);
 void copy();
+void paste();
 
 #endif

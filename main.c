@@ -1,71 +1,4 @@
-#include "arian.h"
-#include "kasfa.h"
-#include <ctype.h>
-
-void menuCounter() {
-    // Bersihkan area menu dulu
-    for(int i = 22; i <= 29; i++) {
-        gotoxy(0, i);
-        printf("%-79s", " "); // clear baris
-    }
-
-    gotoxy(0, 22);
-    printf("+=================================+");
-    gotoxy(0, 23);
-    printf("| [1] Word  [2] Char  [3] Line   |");
-    gotoxy(0, 24);
-    printf("| [ESC] Batal                    |");
-    gotoxy(0, 25);
-    printf("+=================================+");
-    gotoxy(0, 26);
-    printf("Pilih: ");
-
-    int pilih = _getch();
-
-    gotoxy(0, 27);
-    switch (pilih) {
-        case '1':
-            printf("Total kata  : %d", wordcounter(head));
-            break;
-        case '2':
-            printf("Total char  : %d", charcounter(head));
-            break;
-        case '3':
-            printf("Total baris : %d", linecounter(head));
-            break;
-        default:
-            tampilkanTeks();
-            return;
-    }
-
-    gotoxy(0, 28);
-    printf("Tekan sembarang tombol...");
-    _getch();
-    tampilkanTeks();
-}
-void menuFind() {
-    gotoxy(0, 22);
-    printf("+=================================+");
-    gotoxy(0, 23);
-    printf("| FIND                           |");
-    gotoxy(0, 24);
-    printf("+=================================+");
-    gotoxy(0, 25);
-    printf("Cari kata: ");
-
-    showCursor();
-    char keyword[MAX_KOLOM];
-    scanf("%79s", keyword);     // max sesuai MAX_KOLOM
-    hideCursor();
-
-    gotoxy(0, 26);
-    find(head, keyword);        // hasil tampil di sini ke bawah
-
-    gotoxy(0, 30);
-    printf("Tekan sembarang tombol...");
-    _getch();
-    tampilkanTeks();
-}
+// ... (bagian atas main dan fungsi menu biarkan sama persis)
 
 int main() {
     initEditor();
@@ -85,10 +18,17 @@ int main() {
         else if (c == 27) break;            // ESC keluar
         else if (c == 6)  menuFind();       // Ctrl+F
         else if (c == 23) menuCounter();    // Ctrl+W
+        
+        // --- TAMBAHKAN FITURMU DI SINI ---
+        else if (c == 3)  copy();           // Ctrl+C untuk Copy
+        else if (c == 22) paste();          // Ctrl+V untuk Paste
+        // ---------------------------------
+
         else if (c >= 32 && c <= 126) {
             insertChar((char)c);
         }
 
+        // Setelah aksi apapun selesai, layar digambar ulang
         tampilkanTeks();
     }
 

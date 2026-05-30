@@ -72,8 +72,38 @@ int linecounter(Line *head){
 void copy(){
     if(kursor.currentLine != NULL){
         strcpy(clipboard,kursor.currentLine->info);
-        printf("Teks berhasil di copy\n");
+        //printf("Teks berhasil di copy\n");
     }else{
-        printf("Tidak ada teks\n");
+        //printf("Tidak ada teks\n");
     }
+}
+
+void paste(){
+    if(strlen(clipboard) == 0){
+        printf("Clipboard Sedang Kosong\n");
+        return;
+    }
+
+    Line *baru = buatbaris();
+    strcpy(baru->info,clipboard);
+    baru->len = strlen(clipboard);
+
+    Line *curr = kursor.currentLine;
+
+    baru->next = curr->next;
+    baru->prev = curr;
+
+    if(curr->next != NULL){
+        curr->next->prev = baru;
+    }
+
+    curr->next = baru;
+
+    if(tail == curr){
+        tail = baru;
+    }
+
+    kursor.currentLine = baru;
+    kursor.kursorX = baru->len;
+
 }
