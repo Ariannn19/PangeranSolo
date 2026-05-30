@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "kasfa.h"
+char clipboard[MAX_KOLOM];
 
 void find(Line *head,char keyword[]){
     int baris = 1;
@@ -68,3 +69,11 @@ int linecounter(Line *head){
     return baris;
 }
 
+void copy(){
+    if(kursor.currentLine != NULL){
+        strcpy(clipboard,kursor.currentLine->info);
+        printf("Teks berhasil di copy\n");
+    }else{
+        printf("Tidak ada teks\n");
+    }
+}
