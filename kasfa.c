@@ -84,7 +84,7 @@ void paste(){
         return;
     }
 
-    Line *baru = buatbaris();
+    Line *baru = buatBaris();
     strcpy(baru->info,clipboard);
     baru->len = strlen(clipboard);
 
