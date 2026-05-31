@@ -43,6 +43,10 @@ void initEditor() {
     head = tail = firstLine;
     kursor.currentLine = firstLine;
     kursor.kursorX = 0;
+
+    kursor.select = NULL;
+    kursor.startX = 0;
+    kursor.isShift = false;
 }
 
 void insertChar(char c) {
@@ -112,7 +116,6 @@ void wrapChar(Line* curr, char overflowChar) {
     }
 }
 
-
 void gabungBaris(Line* atas, Line* bawah) {
 
     strcat(atas->info, bawah->info);
@@ -136,50 +139,6 @@ void backspace() {
         if (curr->prev == NULL){
             return;
         }
-
-        Line* prevLine = curr->prev;
-        if (curr->len == 0) {
-            int targetX = prevLine->len;
-            prevLine->next = curr->next;
-            if (curr->next != NULL) curr->next->prev = prevLine;
-            if (tail == curr) tail = prevLine;
-            free(curr);
-            kursor.currentLine = prevLine;
-            kursor.kursorX = targetX;
-            return;
-        }
-
-        if (prevLine->len + curr->len <= MAX_KOLOM - 1) {
-            int targetX = prevLine->len;
-            gabungBaris(prevLine, curr);
-            kursor.currentLine = prevLine;
-            kursor.kursorX = targetX;
-            return;
-        }
-        prevLine->len--;
-        int targetX = prevLine->len;
-
-        prevLine->info[prevLine->len] = curr->info[0];
-        prevLine->len++;
-        prevLine->info[prevLine->len] = '\0';
-
-        for (int i = 0; i < curr->len - 1; i++) {
-            curr->info[i] = curr->info[i + 1];
-        }
-        curr->len--;
-        curr->info[curr->len] = '\0';
-
-        kursor.currentLine = prevLine;
-        kursor.kursorX = targetX;
-
-        if (curr->len == 0) {
-            prevLine->next = curr->next;
-            if (curr->next != NULL) curr->next->prev = prevLine;
-            if (tail == curr) tail = prevLine;
-            free(curr);
-        }
-        return;
-
     }
     moveCursor(75);
     delete();
@@ -265,6 +224,53 @@ void enter() {
     kursor.kursorX = 0;
 }
 
+blockArea panjangBlock() {
+    blockArea area;
+    area.startLine = NULL;
+    area.endLine = NULL;
+    area.startPos = 0;
+    area.endPos = 0;
+
+    if (kursor.isShift == false || kursor.select == NULL) {
+        return area; 
+    }
+
+    Line* temp = head; 
+    
+    while (temp != NULL) { 
+        if (temp == kursor.select && temp == kursor.currentLine) { 
+            area.startLine = temp;
+            area.endLine = temp;
+            
+            if (kursor.startX < kursor.kursorX) {
+                area.startPos = kursor.startX;
+                area.endPos = kursor.kursorX;
+            } else {
+                area.startPos = kursor.kursorX;
+                area.endPos = kursor.startX;
+            }
+            break;
+        } 
+        else if (temp == kursor.select) { 
+            area.startLine = kursor.select;
+            area.startPos = kursor.startX;
+            area.endLine = kursor.currentLine;
+            area.endPos = kursor.kursorX;
+            break;
+        } 
+        else if (temp == kursor.currentLine) { 
+            area.startLine = kursor.currentLine;
+            area.startPos = kursor.kursorX;
+            area.endLine = kursor.select;
+            area.endPos = kursor.startX;
+            break;
+        }
+        temp = temp->next; 
+    }
+    
+    return area; 
+}
+
 void moveCursor(int key) {
     switch (key) {
         case 75: /* Kiri */
@@ -325,30 +331,77 @@ void tampilkanTeks() {
     hideCursor();
     gotoxy(0, 0);
     
+    blockArea area = panjangBlock(); 
+    
+    Line* startLine = area.startLine;
+    Line* endLine = area.endLine;
+    int startPos = area.startPos;
+    int endPos = area.endPos;
+    bool inSelection = false;
+
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     Line* temp = head;
     int indexBaris = 0;
     int targetBaris = 0;
     
     while (temp != NULL) {
-        printf("%s", temp->info);
-        for (int i = temp->len; i < MAX_KOLOM; i++) {
-            printf(" ");
+        if (kursor.isShift && temp == startLine) {
+            inSelection = true;
         }
-        
+        for (int i = 0; i < MAX_KOLOM; i++) {
+            bool isHighlight = false;
+            
+            if (kursor.isShift && inSelection) {
+                if (startLine == endLine) { 
+                    // Kasus 1: Blokir hanya di satu baris yang sama
+                    if (i >= startPos && i < endPos) isHighlight = true;
+                } else if (temp == startLine) { 
+                    // Kasus 2: Berada di baris pertama dari blok multi-baris
+                    if (i >= startPos) isHighlight = true;
+                } else if (temp == endLine) { 
+                    // Kasus 3: Berada di baris terakhir dari blok multi-baris
+                    if (i < endPos) isHighlight = true;
+                } else { 
+                    // Kasus 4: Baris ini terjepit di tengah-tengah blok area
+                    isHighlight = true; 
+                }
+            }
+
+            if (isHighlight) {
+                SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED); 
+            } else {
+                SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED); 
+            }
+
+            if (i < temp->len) {
+                printf("%c", temp->info[i]);
+            } else {
+                printf(" ");
+            }
+        }
+
+        if (kursor.isShift && temp == endLine) {
+            inSelection = false;
+        }
+
+        SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED); 
+        printf("\n");
+
+       
         if (temp == kursor.currentLine) {
             targetBaris = indexBaris;
         }
-        printf("\n");
-
         temp = temp->next;
         indexBaris++;
     }
+
     int i = 0;
     while (i < MAX_KOLOM) {
-    printf(" ");
-    i++;
+        printf(" ");
+        i++;
     }
     printf("\n");
+
     gotoxy(kursor.kursorX, targetBaris);
     showCursor();
 }

@@ -5,6 +5,7 @@
 #include <conio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <windows.h>
 
 #define MAX_KOLOM 80
@@ -19,7 +20,17 @@ typedef struct Line {
 typedef struct {
     Line* currentLine;
     int kursorX;
+    Line* select; 
+    int startX;
+    bool isShift;
 } Kursor;
+
+typedef struct {
+    Line* startLine;
+    Line* endLine;
+    int startPos;
+    int endPos;
+} blockArea;
 
 Line* head;
 Line* tail;
@@ -34,6 +45,7 @@ void backspace();
 void delete();
 void gabungBaris(Line* atas, Line* bawah);
 void enter();
+blockArea panjangBlock();
 void tampilkanTeks();
 void bersihkanMemori();
 void gotoxy(int x, int y);
