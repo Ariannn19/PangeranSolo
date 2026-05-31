@@ -136,6 +136,50 @@ void backspace() {
         if (curr->prev == NULL){
             return;
         }
+
+        Line* prevLine = curr->prev;
+        if (curr->len == 0) {
+            int targetX = prevLine->len;
+            prevLine->next = curr->next;
+            if (curr->next != NULL) curr->next->prev = prevLine;
+            if (tail == curr) tail = prevLine;
+            free(curr);
+            kursor.currentLine = prevLine;
+            kursor.kursorX = targetX;
+            return;
+        }
+
+        if (prevLine->len + curr->len <= MAX_KOLOM - 1) {
+            int targetX = prevLine->len;
+            gabungBaris(prevLine, curr);
+            kursor.currentLine = prevLine;
+            kursor.kursorX = targetX;
+            return;
+        }
+        prevLine->len--;
+        int targetX = prevLine->len;
+
+        prevLine->info[prevLine->len] = curr->info[0];
+        prevLine->len++;
+        prevLine->info[prevLine->len] = '\0';
+
+        for (int i = 0; i < curr->len - 1; i++) {
+            curr->info[i] = curr->info[i + 1];
+        }
+        curr->len--;
+        curr->info[curr->len] = '\0';
+
+        kursor.currentLine = prevLine;
+        kursor.kursorX = targetX;
+
+        if (curr->len == 0) {
+            prevLine->next = curr->next;
+            if (curr->next != NULL) curr->next->prev = prevLine;
+            if (tail == curr) tail = prevLine;
+            free(curr);
+        }
+        return;
+
     }
     moveCursor(75);
     delete();
@@ -158,6 +202,10 @@ void delete() {
         }        
         if(curr->len + nextLine->len <= MAX_KOLOM -1){
             gabungBaris(curr, nextLine);
+            return;
+        }
+
+        if (curr->len >= MAX_KOLOM - 1) {
             return;
         }
         
