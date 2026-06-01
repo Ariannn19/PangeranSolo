@@ -9,5 +9,6 @@ int charcounter(Line *head);
 int linecounter(Line *head);
 void copy();
 void paste();
+void cut();
 
 #endif

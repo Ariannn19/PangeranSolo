@@ -107,3 +107,54 @@ void paste(){
     kursor.kursorX = baru->len;
 
 }
+
+void cut(){
+        copy();
+        Line *curr = kursor.currentLine;
+        Line *x;
+        Line *kanan;
+        Line *kiri;
+
+        //jika curr hanya satu baris
+        if(curr == head && curr == tail){
+            curr->info[0] = '\0';
+            curr->len = 0;
+            kursor.kursorX = curr->len;
+            return;
+        }
+
+        //jika potong baris palng atas
+        if(curr == head){
+            x = curr;
+            head = x->next;
+            kursor.currentLine = head;
+            head->prev = NULL ;
+            kursor.kursorX = 0;
+            free(x);
+            return;
+        }
+
+        //jika yang dipotong node paling bawah
+        if(curr == tail){
+            x = curr;
+            tail = x->prev;
+            kursor.currentLine = tail;
+            kursor.kursorX = tail->len;
+            tail->next = NULL;
+            free(x);
+            return;
+        }
+
+        //jika yang dipotong  di tengah tengah
+        if(curr != head && curr != tail){
+            x = curr;
+            kanan = x->next;
+            kiri = x->prev;
+            kanan->prev = kiri;
+            kiri->next= kanan;
+            kursor.currentLine = kanan;
+            kursor.kursorX = 0;
+            free(x);
+            return;
+        }
+}

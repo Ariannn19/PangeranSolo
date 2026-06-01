@@ -92,6 +92,7 @@ int main() {
         else if (c == 23) menuCounter();    // Ctrl+W
         else if (c == 3)  copy();           // Ctrl+C (Fitur Kasfa)
         else if (c == 22) paste();          // Ctrl+V (Fitur Kasfa)
+        else if(c == 24)  cut();
         else if (c >= 32 && c <= 126) {
             insertChar((char)c);
         }
