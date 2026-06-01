@@ -70,12 +70,21 @@ int linecounter(Line *head){
 }
 
 void copy(){
-    if(kursor.currentLine != NULL){
-        strcpy(clipboard,kursor.currentLine->info);
-        //printf("Teks berhasil di copy\n");
-    }else{
-        //printf("Tidak ada teks\n");
+    int i,j;
+    if(kursor.isShift == true && kursor.select != NULL){
+        blockArea area = panjangBlock();
+        if(area.startLine == area.endLine){
+            j = 0;
+            i = area.startPos;
+            while(i<area.endPos){
+                clipboard[j] = area.startLine->info[i];
+                j++;
+                i++;
+            }
+            clipboard[j] = '\0';
+        }
     }
+    
 }
 
 void paste(){
