@@ -141,6 +141,55 @@ void paste(){
 }
 
 void cut() {
-    
+    int i,j;
+    Line* hapus;
+    if(kursor.isShift == true && kursor.select != NULL){
+        blockArea area = panjangBlock();
+        copy();
+
+        if(area.startLine == area.endLine){
+            int jumlah_potong = area.endPos - area.startPos;
+            i = area.endPos;
+
+            while(i <= area.startLine->len){
+                area.startLine->info[i-jumlah_potong] = area.startLine->info[i];
+                i++;
+            }
+            area.startLine->len = area.startLine->len - jumlah_potong;
+            kursor.currentLine = area.startLine;
+            kursor.kursorX = area.startPos;
+        }else{
+            area.startLine->info[area.startPos] = '\0';
+            area.startLine->len = area.startPos;
+
+            i = area.endPos;
+            j = 0;
+            while(i <= area.endLine->len){
+                area.endLine->info[j] = area.endLine->info[i];
+                i++;
+                j++;
+            }
+            area.endLine->len = area.endLine->len - area.endPos;
+
+            hapus = area.startLine->next;
+            while(hapus != area.endLine){
+                Line* nextHps = hapus->next;
+                free(hapus);
+                hapus = nextHps;
+            }
+
+            area.startLine->next = area.endLine;
+            area.endLine->prev = area.startLine;
+
+            if(area.startLine->len + area.endLine->len < MAX_KOLOM){
+                gabungBaris(area.startLine,area.endLine);
+            }
+
+            kursor.currentLine = area.startLine;
+            kursor.kursorX =  area.startPos;
+        }
+        kursor.isShift = false;
+        kursor.select = NULL;
+    }
 
 }
