@@ -71,7 +71,7 @@ int linecounter(Line *head){
 }
 
 void copy(){
-    int i,j;
+    int i,j = 0;
     if(kursor.isShift == true && kursor.select != NULL){
         blockArea area = panjangBlock();
         Line* temp = area.startLine;
@@ -91,7 +91,6 @@ void copy(){
             }
 
             i = btsAwal;
-            j = 0;
             while(i < btsAkhir){
                 clipboard[j] = temp->info[i];
                 i++;
