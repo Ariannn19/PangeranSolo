@@ -54,7 +54,7 @@ int main() {
         else if (c == 13) enter();          // Enter
         else if (c == 27) break;            // ESC keluar
         else if (c == 6){
-            prinf("Kata yang mau dicari: ");
+            printf("Kata yang mau dicari: ");
             fgets(keyword,sizeof(keyword),stdin);
             find(head,keyword);
         }       // Ctrl+F
