@@ -73,16 +73,39 @@ void copy(){
     int i,j;
     if(kursor.isShift == true && kursor.select != NULL){
         blockArea area = panjangBlock();
-        if(area.startLine == area.endLine){
-            j = 0;
-            i = area.startPos;
-            while(i<area.endPos){
-                clipboard[j] = area.startLine->info[i];
-                j++;
-                i++;
+        Line* temp = area.startLine;
+        while(temp != NULL){
+            int btsAwal,btsAkhir;
+
+            if(temp == area.startLine){
+                btsAwal = area.startPos;
+            }else{
+                btsAwal = 0;    
             }
-            clipboard[j] = '\0';
+
+            if(temp == area.endLine){
+                btsAkhir = area.endPos;
+            }else{
+                btsAkhir = temp->len;
+            }
+
+            i = btsAwal;
+            j = 0;
+            while(i < btsAkhir){
+                clipboard[j] = temp->info[i];
+                i++;
+                j++;
+            }
+
+            if(temp == area.endLine){
+                break;
+            }else{
+                clipboard[j] = '\n';
+                j++;
+                temp = temp->next;
+            }
         }
+        clipboard[j] = '\0';
     }
     
 }
@@ -117,53 +140,7 @@ void paste(){
 
 }
 
-void cut(){
-        copy();
-        Line *curr = kursor.currentLine;
-        Line *x;
-        Line *kanan;
-        Line *kiri;
+void cut() {
+    
 
-        //jika curr hanya satu baris
-        if(curr == head && curr == tail){
-            curr->info[0] = '\0';
-            curr->len = 0;
-            kursor.kursorX = curr->len;
-            return;
-        }
-
-        //jika potong baris palng atas
-        if(curr == head){
-            x = curr;
-            head = x->next;
-            kursor.currentLine = head;
-            head->prev = NULL ;
-            kursor.kursorX = 0;
-            free(x);
-            return;
-        }
-
-        //jika yang dipotong node paling bawah
-        if(curr == tail){
-            x = curr;
-            tail = x->prev;
-            kursor.currentLine = tail;
-            kursor.kursorX = tail->len;
-            tail->next = NULL;
-            free(x);
-            return;
-        }
-
-        //jika yang dipotong  di tengah tengah
-        if(curr != head && curr != tail){
-            x = curr;
-            kanan = x->next;
-            kiri = x->prev;
-            kanan->prev = kiri;
-            kiri->next= kanan;
-            kursor.currentLine = kanan;
-            kursor.kursorX = 0;
-            free(x);
-            return;
-        }
 }
