@@ -5,6 +5,7 @@
 #include <windows.h> // WAJIB DITAMBAHKAN: Untuk sensor tombol SHIFT
 #include "arian.h"
 #include "kasfa.h"
+char keyword[MAX_KOLOM];
 
 // --- FUNGSI MENU ---
 // (Fungsi menuCounter dan menuFind tetap sama persis seperti buatanmu, tidak perlu diubah)
@@ -52,8 +53,12 @@ int main() {
         else if (c == 8)  backspace();      // Backspace
         else if (c == 13) enter();          // Enter
         else if (c == 27) break;            // ESC keluar
-        else if (c == 6)  menuFind();       // Ctrl+F
-        else if (c == 23) menuCounter();    // Ctrl+W
+        else if (c == 6){
+            prinf("Kata yang mau dicari: ");
+            fgets(keyword,sizeof(keyword),stdin);
+            find(head,keyword);
+        }       // Ctrl+F
+        else if (c == 23) wordcounter(head);    // Ctrl+W
         else if (c == 3)  copy();           // Ctrl+C
         else if (c == 22) paste();          // Ctrl+V
         else if (c == 24) cut();            // Ctrl+X

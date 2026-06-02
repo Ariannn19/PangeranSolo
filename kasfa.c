@@ -3,6 +3,7 @@
 #include "kasfa.h"
 char clipboard[MAX_KOLOM];
 
+
 void find(Line *head,char keyword[]){
     int baris = 1;
     while(head != NULL){
