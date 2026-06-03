@@ -112,32 +112,19 @@ void copy(){
 
 void paste(){
     if(strlen(clipboard) == 0){
-        printf("Clipboard Sedang Kosong\n");
         return;
     }
 
-    Line *baru = buatBaris();
-    strcpy(baru->info,clipboard);
-    baru->len = strlen(clipboard);
-
-    Line *curr = kursor.currentLine;
-
-    baru->next = curr->next;
-    baru->prev = curr;
-
-    if(curr->next != NULL){
-        curr->next->prev = baru;
+    int batas = strlen(clipboard);
+    int i = 0;
+    while(i < batas){
+        if(clipboard[i] == '\n'){
+            enter();
+        }else{
+            insertChar(clipboard[i]);
+        }
+        i++;
     }
-
-    curr->next = baru;
-
-    if(tail == curr){
-        tail = baru;
-    }
-
-    kursor.currentLine = baru;
-    kursor.kursorX = baru->len;
-
 }
 
 void cut() {
