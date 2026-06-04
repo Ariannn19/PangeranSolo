@@ -3,6 +3,7 @@
 int main() {
     initEditor(); 
     int ch;
+    system("cls");
     while (1) {
         tampilkanTeks();
 
@@ -52,6 +53,6 @@ int main() {
             insertChar((char)ch);
         }
     }
-    
+    system("cls");
     return 0;
 }

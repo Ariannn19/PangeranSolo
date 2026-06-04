@@ -23,6 +23,7 @@ typedef struct {
     Line* select; 
     int startX;
     bool isShift;
+    int offsetY;
 } Kursor;
 
 typedef struct {
@@ -47,11 +48,8 @@ void gabungBaris(Line* atas, Line* bawah);
 void enter();
 blockArea panjangBlock();
 void tampilkanTeks();
-void bersihkanMemori();
 void gotoxy(int x, int y);
 void hideCursor();
 void showCursor();
 
 #endif
-
-

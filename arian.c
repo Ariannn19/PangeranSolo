@@ -47,6 +47,7 @@ void initEditor() {
     kursor.select = NULL;
     kursor.startX = 0;
     kursor.isShift = false;
+    kursor.offsetY = 0;
 }
 
 void insertChar(char c) {
@@ -219,7 +220,6 @@ void enter() {
     if (tail == curr) {
         tail = barisBaru;
     }
-    
     kursor.currentLine = barisBaru;
     kursor.kursorX = 0;
 }
@@ -313,95 +313,132 @@ void moveCursor(int key) {
     }
 }
 
-void bersihkanMemori() {
-    Line* curr = head;
-    Line* Hapus;
-    
-    while (curr != NULL) {
-        Hapus = curr;          
-        curr = curr->next; 
-        free(Hapus);               
-    }
-    head = NULL;
-    tail = NULL;
-    kursor.currentLine = NULL;
-}
-
 void tampilkanTeks() {
     hideCursor();
     gotoxy(0, 0);
     
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    int TINGGI_LAYAR = 25;
+    int LEBAR_LAYAR = 80;
+
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        LEBAR_LAYAR = csbi.srWindow.Right - csbi.srWindow.Left;
+        TINGGI_LAYAR = csbi.srWindow.Bottom - csbi.srWindow.Top;
+    }
+
+    int kursorY = 0;
+    Line* cariY = head;
+    while (cariY != NULL) {
+        if (cariY == kursor.currentLine) break;
+        kursorY++;
+        cariY = cariY->next;
+    }
+
+    if (kursorY < kursor.offsetY) {
+        kursor.offsetY = kursorY;
+    } 
+    else if (kursorY >= kursor.offsetY + TINGGI_LAYAR) {
+        kursor.offsetY = kursorY - TINGGI_LAYAR + 1;
+    }
+
     blockArea area = panjangBlock(); 
-    
     Line* startLine = area.startLine;
     Line* endLine = area.endLine;
     int startPos = area.startPos;
     int endPos = area.endPos;
     bool inSelection = false;
 
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    WORD WARNA_NORMAL = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;
+    WORD WARNA_BLOK = BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
+
     Line* temp = head;
     int indexBaris = 0;
-    int targetBaris = 0;
+    int barisDicetak = 0;
     
-    while (temp != NULL) {
+    while (temp != NULL && barisDicetak < TINGGI_LAYAR) {
         if (kursor.isShift && temp == startLine) {
             inSelection = true;
         }
-        for (int i = 0; i < MAX_KOLOM; i++) {
+
+        if (indexBaris < kursor.offsetY) {
+            if (kursor.isShift && temp == endLine) inSelection = false;
+            temp = temp->next;
+            indexBaris++;
+            continue; 
+        }
+
+        bool isBlok = false; 
+        SetConsoleTextAttribute(hConsole, WARNA_NORMAL);
+
+      char teksBaris[MAX_KOLOM + 1];
+        int bufIdx = 0;                
+
+        for (int i = 0; i < MAX_KOLOM && i < LEBAR_LAYAR; i++) {
             bool isHighlight = false;
             
             if (kursor.isShift && inSelection) {
                 if (startLine == endLine) { 
-                    // Kasus 1: Blokir hanya di satu baris yang sama
                     if (i >= startPos && i < endPos) isHighlight = true;
                 } else if (temp == startLine) { 
-                    // Kasus 2: Berada di baris pertama dari blok multi-baris
                     if (i >= startPos) isHighlight = true;
                 } else if (temp == endLine) { 
-                    // Kasus 3: Berada di baris terakhir dari blok multi-baris
                     if (i < endPos) isHighlight = true;
                 } else { 
-                    // Kasus 4: Baris ini terjepit di tengah-tengah blok area
                     isHighlight = true; 
                 }
             }
 
-            if (isHighlight) {
-                SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED); 
-            } else {
-                SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED); 
+            if (isHighlight != isBlok) {
+                if (bufIdx > 0) {
+                    teksBaris[bufIdx] = '\0'; 
+                    fputs(teksBaris, stdout); 
+                    bufIdx = 0;               
+                }
+
+                if (isHighlight) {
+                    SetConsoleTextAttribute(hConsole, WARNA_BLOK);
+                } else {
+                    SetConsoleTextAttribute(hConsole, WARNA_NORMAL);
+                }
+                isBlok = isHighlight; 
             }
 
             if (i < temp->len) {
-                printf("%c", temp->info[i]);
+                teksBaris[bufIdx++] = temp->info[i];
             } else {
-                printf(" ");
+                teksBaris[bufIdx++] = ' ';
             }
+        }
+
+        if (bufIdx > 0) {
+            teksBaris[bufIdx] = '\0';
+            fputs(teksBaris, stdout);
         }
 
         if (kursor.isShift && temp == endLine) {
             inSelection = false;
         }
-
-        SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED); 
-        printf("\n");
-
-       
-        if (temp == kursor.currentLine) {
-            targetBaris = indexBaris;
-        }
+        
+        SetConsoleTextAttribute(hConsole, WARNA_NORMAL); 
+        printf("\n"); 
+        
+        barisDicetak++;
         temp = temp->next;
         indexBaris++;
     }
+    
+    char spasiKosong[MAX_KOLOM + 1];
+    for(int i = 0; i < LEBAR_LAYAR; i++) spasiKosong[i] = ' ';
+    spasiKosong[LEBAR_LAYAR] = '\0';
 
-    int i = 0;
-    while (i < MAX_KOLOM) {
-        printf(" ");
-        i++;
+    while (barisDicetak < TINGGI_LAYAR) {
+        fputs(spasiKosong, stdout);
+        printf("\n");
+        barisDicetak++;
     }
-    printf("\n");
-
-    gotoxy(kursor.kursorX, targetBaris);
+    
+    gotoxy(kursor.kursorX, kursorY - kursor.offsetY);
     showCursor();
 }
