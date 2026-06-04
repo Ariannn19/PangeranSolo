@@ -51,43 +51,40 @@ Line* load_dari_file(char filename[]) {
     return head;
 }
 
-void push_riwayat(RiwayatNode **current_state, Line *kertas_sekarang) {
-    
-    Line *head_baru = NULL;
-    Line *tail_baru = NULL;
-    Line *current = kertas_sekarang;
-    
+Line* salin_kertas(Line* head) {
+    Line* head_baru = NULL;
+    Line* tail_baru = NULL;
+    Line* current = head;
+
     while (current != NULL) {
-        // Buat salinan node baru
-        Line *newnode = (Line*)malloc(sizeof(Line));
+        Line* newnode = (Line*)malloc(sizeof(Line));
         strcpy(newnode->info, current->info);
         newnode->len = current->len;
         newnode->next = NULL;
         newnode->prev = tail_baru;
-        
-        // Sambungkan salinan node
+
         if (head_baru == NULL) {
             head_baru = newnode;
         } else {
             tail_baru->next = newnode;
         }
         tail_baru = newnode;
-        
-        // Maju ke baris asli berikutnya
         current = current->next;
     }
+    return head_baru;
+}
 
+void push_riwayat(RiwayatNode **current_state, Line *kertas_sekarang) {
     RiwayatNode *riwayat_baru = (RiwayatNode*)malloc(sizeof(RiwayatNode));
-    riwayat_baru->kertas_head = head_baru; // Masukkan hasil fotokopian
+    
+    riwayat_baru->kertas_head = salin_kertas(kertas_sekarang);
     riwayat_baru->prev = *current_state;
     riwayat_baru->next = NULL;
 
-    // Putus rantai masa depan jika ada
     if (*current_state != NULL) {
         (*current_state)->next = riwayat_baru;
     }
-    
-    // Pindahkan kursor waktu ke riwayat terbaru
+
     *current_state = riwayat_baru;
 }
 
@@ -95,12 +92,12 @@ Line* undo(RiwayatNode **current_state) {
     if (*current_state != NULL && (*current_state)->prev != NULL) {
         *current_state = (*current_state)->prev;
     }
-    return (*current_state)->kertas_head;
+    return salin_kertas((*current_state)->kertas_head);
 }
 
 Line* redo(RiwayatNode **current_state) {
     if (*current_state != NULL && (*current_state)->next != NULL) {
         *current_state = (*current_state)->next;
     }
-    return (*current_state)->kertas_head;
+    return salin_kertas((*current_state)->kertas_head);
 }
