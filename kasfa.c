@@ -6,14 +6,19 @@ char clipboard[MAX_KOLOM];
 
 void find(Line *head,char keyword[]){
     int baris = 1;
+    int ketemu = 0;
     while(head != NULL){
         if(strstr(head->info,keyword) != NULL){
             printf("Kata ditemukan pada baris %d: %s\n",baris,head->info);
+            ketemu = 1;
         }
         head = head->next;
         baris++;
     }
 
+    if(ketemu !=  1){
+        printf("Kata tidak ditemukan :( \n");
+    }
     printf("Find selesai\n");
 }
 
