@@ -53,13 +53,16 @@ Setelah program dijalankan, kamu bisa langsung mengetik seperti menggunakan text
 ## ⌨️ Shortcut
 
 * ↑ ↓ ← → : Navigasi teks
+* Shift + Panah (↑ ↓ ← →) : Blok text
 * Ctrl + S : Save
-* Ctrl + L : Load
+* Ctrl + Q : Copy
+* Ctrl + X : Cut
+* Ctrl + E : Paste
+* Ctrl + O : Load
 * Ctrl + Z : Undo
 * Ctrl + Y : Redo
 * Ctrl + F : Cari kata (Find)
 * Ctrl + W : Word Counter
-* Ctrl + R : Wrap Text
 * ESC : Keluar dari editor
 
 ---

@@ -1,169 +1,200 @@
-#include "kasfa.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <windows.h> 
 #include "arian.h"
 #include "rasya.h"
-
-stack riwayat; // Mendeklarasikan stack untuk menyimpan riwayat (undo/redo)
+#include "kasfa.h"
 
 int main() {
-    char pilihan; 
-    char nama_file[50];
-    
-    // Memastikan jumlah baris minimal adalah 1 saat aplikasi pertama kali dijalankan
-    if(lines == 0) lines = 1; 
+    initEditor();
+    RiwayatNode *riwayat = NULL;
+    push_riwayat(&riwayat, head); 
 
-    // Loop utama aplikasi (Menu)
-    while(1) {
-        system("cls"); // Membersihkan layar konsol
+    int ch;
+    int running = 1;
+    char filename[100]; 
+    char keyword[100]; 
+
+    system("cls");
+
+    while (running) {
+        tampilkanTeks();
         
-        // Menampilkan Menu Utama
-        printf("\n"
-               "  =======================================\n"
-               "  ||                                   ||\n"
-               "  ||     PANGERAN SOLO TEXT EDITOR     ||\n"
-               "  ||                                   ||\n"
-               "  =======================================\n"
-               "  ||                                   ||\n"
-               "  ||  [1] New File                     ||\n"
-               "  ||  [2] Open File                    ||\n"
-               "  ||  [3] Help & Shortcuts             ||\n"
-               "  ||  [4] Exit                         ||\n"
-               "  ||                                   ||\n"
-               "  =======================================\n"
-               "  Pilihan Anda (1-4): ");
-        
-        pilihan = _getch(); // Membaca input pengguna 
+        ch = _getch();
 
-        // Jika user memilih New File (1) atau Open File (2)
-        if (pilihan == '1' || pilihan == '2') {
-            
-            if (pilihan == '1') {
-                // Persiapan membuat file baru: reset kursor, baris, dan kosongkan teks
-                cursorX = 0; cursorY = 0; lines = 1;
-                text[0][0] = '\0'; 
-            } 
-            else {
-                // Membuka file yang sudah ada
-                system("cls");
-                printf("\nMasukkan nama file untuk dibuka: ");
-                scanf("%s", nama_file); getchar(); // Membersihkan buffer enter setelah scanf
-
-                // Memanggil fungsi untuk memuat isi file ke array 'text'
-                int loadedLines = load_dari_file(nama_file, text);
-                if (loadedLines > 0) {
-                    lines = loadedLines; // Update total baris sesuai isi file
-                    cursorX = 0; cursorY = 0;
-                } else {
-                    printf("\nGagal memuat file. Tekan tombol apa saja untuk kembali...");
-                    _getch();
-                    continue; // Kembali ke menu utama jika file gagal dimuat
-                }
+        if (ch == 0 || ch == 224) { 
+            ch = _getch(); 
+            if (ch == 83) { 
+                kursor.isShift = false;
+                kursor.select = NULL;
+                delete(); 
             }
-
-            // Inisialisasi stack untuk Undo/Redo dan simpan status kanvas pertama kali
-            init_stack(&riwayat);
-            push(&riwayat, text, lines); 
-
-            // Menampilkan Splash Screen sebelum masuk ke layar editor utama
-            system("cls");
-            printf("\n"
-                   "  ============================================================\n"
-                   "  ||                  MEMASUKI MODE EDITOR                  ||\n"
-                   "  ============================================================\n"
-                   "  || PETUNJUK SHORTCUT:                                     ||\n"
-                   "  || - [ESC]    : Keluar ke Menu Utama & Simpan Riwayat     ||\n"
-                   "  || - [Ctrl+S] : Simpan File (Save)                        ||\n"
-                   "  || - [Ctrl+Z] : Batal (Undo)                              ||\n"
-                   "  || - [Ctrl+Y] : Ulangi (Redo)                             ||\n"
-                   "  || - [Ctrl+F] : Cari Kata (Find)                          ||\n"
-                   "  || - [Ctrl+W] : Hitung Kata & Karakter (Word Counter)     ||\n"
-                   "  || - [Ctrl+R] : Tampilan Wrap Text                        ||\n"
-                   "  ============================================================\n"
-                   "  Tekan tombol apa saja untuk mulai mengetik...");
-            _getch(); 
-
-            render(); // Menampilkan isi teks ke layar untuk pertama kalinya
-            
-            // Loop menangkap setiap ketikan user
-            while(1) {
-                int ch = _getch(); // Menangkap kode ASCII tombol yang ditekan
-                
-                // Menangani tombol panah (Arrow Keys memiliki 2 byte kode, diawali 224 atau 0)
-                if (ch == 224 || ch == 0) { 
-                    ch = _getch();  
-                    moveCursor(ch); 
-                }
-                else if (ch == 27) { // 27 kode ASCII  tombol ESC
-                    push(&riwayat, text, lines); // Simpan state terakhir sebelum keluar
-                    break; // Keluar dari loop, kembali ke Menu Utama
-                }
-                else if (ch == 26) { // 26 ASCII Ctrl+Z 
-                    pop(&riwayat, text, &lines);
-                    cursorX = 0; cursorY = 0; // Kembalikan kursor ke awal setelah undo
-                }
-                else if (ch == 25) { // 25 ASCII Ctrl+Y
-                    redo(&riwayat, text, &lines);
-                    cursorX = 0; cursorY = 0; 
-                }
-                else if (ch == 19) { // 19 ASCII Ctrl+S 
-                    system("cls");
-                    printf("\n--- MODE SAVE ---\nMasukkan nama file (Tambahkan ekstensi .txt): ");
-                    scanf("%s", nama_file); getchar(); 
-                    save_ke_file(nama_file, text, lines); // Simpan array teks ke file eksternal
-                    printf("File %s berhasil disimpan! Tekan apa saja untuk lanjut...", nama_file);
-                    _getch();
-                }
-                // Mengelompokkan fitur shortcut tambahan (Ctrl+F, Ctrl+W, Ctrl+R)
-                else if (ch == 6 || ch == 23 || ch == 18) { 
-                    system("cls");
-                    if (ch == 6) {        // 6 ASCII Ctrl+F
-                        printf("\n--- MODE CARI KATA ---\n"); find(text, lines);
-                    } else if (ch == 23) { // 23 ASCII Ctrl+W
-                        printf("\n--- ANALISIS DOKUMEN ---\n"); wordcounter(text, lines);
-                    } else if (ch == 18) { // 18 ASCII Ctrl+R
-                        printf("\n--- TAMPILAN WRAP TEXT ---\n"); wraptext(text, lines);
+            else{
+                if (GetAsyncKeyState(VK_SHIFT) & 0x8000) {
+                    if (kursor.isShift == false) {
+                        kursor.isShift = true;
+                        kursor.select = kursor.currentLine; 
+                        kursor.startX = kursor.kursorX;     
                     }
+                    } else {
+                        if(ch != 24 && ch != 17) {
+                            kursor.isShift = false;
+                            kursor.select = NULL;
+                        }
+                    }   
+            }    
+                moveCursor(ch);
+        } else {
+            if ((ch >= 32 && ch <= 126) || ch == 8 || ch == 13) {
+                kursor.isShift = false;
+                kursor.select = NULL;
+            }
+            
+            switch (ch) {
+                case 27: // Tombol ESC
+                    running = 0;
+                    break;
+                    
+                case 8:  // Tombol Backspace
+                    backspace();
+                    break;
+                    
+                case 13: // Tombol Enter
+                    enter();
+                    push_riwayat(&riwayat, head); 
+                    break;
+                    
+                case 19: // Ctrl + S -> Save
+                    system("cls"); 
+                    printf(">>> SIMPAN DOKUMEN <<<\n");
+                    printf("Masukkan nama file (contoh: dokumen.txt): ");
+                    scanf("%s", filename); 
+                    
+                    save_ke_file(filename, head);
+                    system("cls"); 
+                    break;
+                    
+                case 15: // Ctrl + O -> Open/Load
+                    system("cls");
+                    printf(">>> BUKA DOKUMEN <<<\n");
+                    printf("Masukkan nama file yang ingin dibuka: ");
+                    scanf("%s", filename);
+                    
+                    Line* tempHead = load_dari_file(filename);
+                    if (tempHead != NULL) { 
+                        bersihkanMemori();
+                        head = tempHead;
+                        
+                        Line* temp = head;
+                        while (temp->next != NULL) {
+                            temp = temp->next;
+                        }
+                        tail = temp;
+
+                        kursor.currentLine = head;
+                        kursor.kursorX = 0;
+                        push_riwayat(&riwayat, head); 
+                        system("cls"); 
+                    } else {
+                        printf("\n[!] File '%s' tidak ditemukan! Tekan tombol apa saja untuk kembali...", filename);
+                        _getch(); 
+                        system("cls");
+                    }
+                    break;
+                    
+                case 26: // Ctrl + Z -> Undo
+                {
+                    Line* undoHead = undo(&riwayat);
+                    if (undoHead != NULL) {
+                        head = undoHead;
+                        Line* temp = head;
+                        while (temp->next != NULL) {
+                            temp = temp->next;
+                        }
+                        tail = temp;
+                        kursor.currentLine = tail;
+                        kursor.kursorX = tail->len;
+                        system("cls");
+                    }
+                    break;
+                }
+                    
+                case 25: // Ctrl + Y -> Redo
+                {
+                    Line* redoHead = redo(&riwayat);
+                    if (redoHead != NULL) {
+                        head = redoHead;
+                        Line* temp = head;
+                        while (temp->next != NULL) {
+                            temp = temp->next;
+                        }
+                        tail = temp;
+                        kursor.currentLine = tail;
+                        kursor.kursorX = tail->len;
+                        system("cls");
+                    }
+                    break;
+                }
+
+                case 6: // Ctrl + F -> Find
+                    system("cls");
+                    printf(">>> CARI KATA <<<\n");
+                    printf("Masukkan kata yang ingin dicari: ");
+                    scanf("%s", keyword);
+                    printf("\n");
+                    find(head, keyword); 
                     printf("\nTekan tombol apa saja untuk kembali ke editor...");
                     _getch();
-                }
-                else if (ch == '\r') { // Tombol Enter
-                    enterKey(); // Buat baris baru
-                    push(&riwayat, text, lines); // Simpan riwayat tiap kali ganti baris
-                }
-                else if (ch == '\b') { // Tombol Backspace
-                    backspace(); 
-                }
-                // Menangkap karakter yang bisa diketik (huruf, angka, simbol)
-                else if (ch >= 32 && ch <= 126) { 
-                    insertChar((char)ch); // Masukkan karakter ke dalam teks
-                }
-                
-                render(); // refresh layar setiap kali ada perubahan/input
+                    system("cls");
+                    break;
+
+                case 23: // Ctrl + W -> Word Counter 
+                    system("cls");
+                    printf(">>> STATISTIK DOKUMEN <<<\n\n");
+                    printf("--- PREVIEW DOKUMEN ---\n");
+                    int total_lines = linecounter(head); 
+                    int total_words = wordcounter(head);
+                    int total_chars = charcounter(head);
+                    printf("\n--- HASIL PERHITUNGAN ---\n");
+                    printf("Total Baris    : %d\n", total_lines);
+                    printf("Total Kata     : %d\n", total_words);
+                    printf("Total Karakter : %d\n", total_chars);
+                    printf("\nTekan tombol apa saja untuk kembali ke editor...");
+                    _getch();
+                    system("cls");
+                    break;
+
+                case 17: // Ctrl + Q -> Copy (Kode ASCII 17)
+                    copy();
+                    break;
+                    
+                case 5: // Ctrl + E -> Paste (Kode ASCII 5)
+                    paste();
+                    push_riwayat(&riwayat, head); 
+                    break;
+                    
+                case 24: // Ctrl + X -> Cut
+                    cut();
+                    push_riwayat(&riwayat, head); 
+                    break;
+                    
+                default:
+                    if (ch >= 32 && ch <= 126) {
+                        insertChar((char)ch);
+                        
+                        if (ch == 32) {
+                            push_riwayat(&riwayat, head); 
+                        } 
+                    }
+                    break;
             }
-        } 
-        // Jika user memilih menu Help (3)
-        else if (pilihan == '3') {
-            system("cls");
-            printf("\n  === PANDUAN PENGGUNAAN ===\n"
-                   "  Navigasi:\n"
-                   "  - [Panah] Pindah Kursor\n"
-                   "  - [ESC]   Keluar dari Editor ke Menu Utama\n\n"
-                   "  Shortcut:\n"
-                   "  - [Ctrl+S] Save File\n"
-                   "  - [Ctrl+Z] Undo (Batal)\n"
-                   "  - [Ctrl+Y] Redo (Ulangi)\n"
-                   "  - [Ctrl+F] Cari Kata (Find)\n"
-                   "  - [Ctrl+W] Hitung Kata & Karakter (Word Count)\n"
-                   "  - [Ctrl+R] Tampilan Wrap Text\n\n"
-                   "  Tekan tombol apa saja untuk kembali...");
-            _getch();
-        } 
-        // Jika user memilih menu Exit (4)
-        else if (pilihan == '4') {
-            system("cls");
-            printf("\n  Terima kasih telah menggunakan Pangeran Solo Text Editor!\n");
-            break; // Hentikan loop
         }
     }
-    
+
+    bersihkanMemori();
+    system("cls");
+    printf("Keluar dari PangeranSolo. Sampai jumpa!\n");
+
     return 0;
 }

@@ -118,7 +118,6 @@ void wrapChar(Line* curr, char overflowChar) {
 }
 
 void gabungBaris(Line* atas, Line* bawah) {
-    
     strcat(atas->info, bawah->info);
     atas->len = atas->len + bawah->len;
 
@@ -137,7 +136,7 @@ void gabungBaris(Line* atas, Line* bawah) {
 
 void bersihkanMemori() {
     Line* curr = head;
-    Line* hapus;  // konsistenkan huruf kecil
+    Line* hapus;
     
     while (curr != NULL) {
         hapus = curr;          

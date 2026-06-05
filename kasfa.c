@@ -171,7 +171,7 @@ void cut() {
             area.startLine->next = area.endLine;
             area.endLine->prev = area.startLine;
 
-            if(area.startLine->len + area.endLine->len < MAX_KOLOM){
+         if(area.startLine->len + area.endLine->len < MAX_KOLOM){
                 gabungBaris(area.startLine,area.endLine);
             }
 

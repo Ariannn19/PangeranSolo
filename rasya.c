@@ -26,14 +26,15 @@ Line* load_dari_file(char filename[]) {
 
     Line *head = NULL;
     Line *tail = NULL;
-    char buffer[MAX_KOLOM];
+    char buffer[100];
 
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
         buffer[strcspn(buffer, "\n")] = '\0';
+        buffer[strcspn(buffer, "\r")] = '\0';
         
         // Buat node baru
         Line *newnode = (Line*)malloc(sizeof(Line));
-        strcpy(newnode->info, buffer);
+        strncpy(newnode->info, buffer, MAX_KOLOM - 1);
         newnode->len = strlen(buffer);
         newnode->next = NULL;
         newnode->prev = tail;
