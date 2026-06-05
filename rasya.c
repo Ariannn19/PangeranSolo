@@ -1,106 +1,103 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "rasya.h"
 
-void save_ke_file(char filename[], char kertas [100][100], int jumlah_baris) 
-{
-    FILE *file = fopen(filename, "w"); // Membuka file untuk ditulis
+void save_ke_file(char filename[], Line *head) {
+    FILE *file = fopen(filename, "w");
 
-    if (file == NULL)   
-    {
+    if (file == NULL) {
         printf("Gagal membuka file untuk disimpan.\n");
         return;
     }
-
-    for(int i = 0; i < jumlah_baris; i++) {
-        fprintf(file, "%s\n", kertas[i]); 
+    
+    Line *current = head;
+    while (current != NULL) {
+        fprintf(file, "%s\n", current->info);
+        current = current->next;
     }
-
+    
     fclose(file);
 }
 
-int load_dari_file(char filename[], char kertas [100][100]) 
-{
+Line* load_dari_file(char filename[]) {
     FILE *file = fopen(filename, "r");
+    if (file == NULL) return NULL;
 
-    if (file == NULL)
-    {
-        printf("File %s tidak ditemukan.\n", filename);
-        return 0;
-    }
+    Line *head = NULL;
+    Line *tail = NULL;
+    char buffer[MAX_KOLOM];
 
-    char buffer[100];
-    int jumlah_baris = 0;
-
-    while(fgets(buffer, sizeof(buffer), file) != NULL && jumlah_baris < 100) {
-        buffer[strcspn(buffer, "\n")] = '\0'; // Menghapus newline
-        strncpy(kertas[jumlah_baris], buffer, 99);
-        jumlah_baris++;
-    }
-
-    fclose(file);
-    printf("Berhasil memuat %d baris dari file %s.\n", jumlah_baris, filename);
-    return jumlah_baris;
-}
-
-
-void init_stack(stack *s) { 
-    s->top = -1; 
-    s->max_top = -1; 
-}
-
-int is_empty(stack *s) { 
-    if (s->top == -1) {
-        return 1; 
-    } else {
-        return 0; 
-    }
-}
-
-void push(stack *s, char kertas_sekarang[100][100], int jumlah_baris) { 
-    if (s->top >= 99) { 
-        printf("Riwayat penuh.\n"); 
-        return;
-    }
-    s->top++; 
-    s->max_top = s->top; 
-    s->riwayat_baris[s->top] = jumlah_baris;
-
-    for (int i = 0; i < jumlah_baris; i++) { 
-        strcpy(s->riwayat_kertas[s->top][i], kertas_sekarang[i]);
-    }
-}
-
-void pop(stack *s, char kertas_tujuan[100][100], int *jumlah_baris_tujuan) { 
-    if (is_empty(s) == 1) {
-        printf("Tidak ada riwayat untuk di-undo.\n");
-        return;
-    }
-
-    s->top--; 
-
-    if(s->top == -1) {
-        *jumlah_baris_tujuan = 0; 
-        return;
-    }
-
-    *jumlah_baris_tujuan = s->riwayat_baris[s->top];
-    for (int i = 0; i < *jumlah_baris_tujuan; i++) {
-        strcpy(kertas_tujuan[i], s->riwayat_kertas[s->top][i]);
-    }
-}
-
-void redo(stack *s, char kertas_tujuan[100][100], int *jumlah_baris_tujuan) { 
-    if (s->top >= s->max_top) {  
-        printf("Tidak ada riwayat untuk di-redo.\n");
-        return;
-    }
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
+        buffer[strcspn(buffer, "\n")] = '\0';
         
-    s->top++; 
+        // Buat node baru
+        Line *newnode = (Line*)malloc(sizeof(Line));
+        strcpy(newnode->info, buffer);
+        newnode->len = strlen(buffer);
+        newnode->next = NULL;
+        newnode->prev = tail;
 
-     *jumlah_baris_tujuan = s->riwayat_baris[s->top]; 
-     
-    for (int i = 0; i < *jumlah_baris_tujuan; i++) { 
-        strcpy(kertas_tujuan[i], s->riwayat_kertas[s->top][i]);
+        // Sambungkan node
+        if (head == NULL) {
+            head = newnode;
+        } else {
+            tail->next = newnode;
+        }
+        tail = newnode;
     }
+    
+    fclose(file);
+    return head;
+}
+
+Line* salin_kertas(Line* head) {
+    Line* head_baru = NULL;
+    Line* tail_baru = NULL;
+    Line* current = head;
+
+    while (current != NULL) {
+        Line* newnode = (Line*)malloc(sizeof(Line));
+        strcpy(newnode->info, current->info);
+        newnode->len = current->len;
+        newnode->next = NULL;
+        newnode->prev = tail_baru;
+
+        if (head_baru == NULL) {
+            head_baru = newnode;
+        } else {
+            tail_baru->next = newnode;
+        }
+        tail_baru = newnode;
+        current = current->next;
+    }
+    return head_baru;
+}
+
+void push_riwayat(RiwayatNode **current_state, Line *kertas_sekarang) {
+    RiwayatNode *riwayat_baru = (RiwayatNode*)malloc(sizeof(RiwayatNode));
+    
+    riwayat_baru->kertas_head = salin_kertas(kertas_sekarang);
+    riwayat_baru->prev = *current_state;
+    riwayat_baru->next = NULL;
+
+    if (*current_state != NULL) {
+        (*current_state)->next = riwayat_baru;
+    }
+
+    *current_state = riwayat_baru;
+}
+
+Line* undo(RiwayatNode **current_state) {
+    if (*current_state != NULL && (*current_state)->prev != NULL) {
+        *current_state = (*current_state)->prev;
+    }
+    return salin_kertas((*current_state)->kertas_head);
+}
+
+Line* redo(RiwayatNode **current_state) {
+    if (*current_state != NULL && (*current_state)->next != NULL) {
+        *current_state = (*current_state)->next;
+    }
+    return salin_kertas((*current_state)->kertas_head);
 }
