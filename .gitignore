@@ -1,7 +1,2 @@
-arian.h
-arian.c
-kasfa.h
-kasfa.c
-coba.c
-*.txt
-*.exe
+# Abaikan semua file JSON di folder .vscode
+.vscode/*.json
