@@ -42,6 +42,7 @@ void initEditor();
 void moveCursor(int key);
 void insertChar(char c);
 void wrapChar(Line* curr, char overflowChar);
+void bersihkanMemori();
 void backspace();
 void delete();
 void gabungBaris(Line* atas, Line* bawah);

@@ -118,7 +118,7 @@ void wrapChar(Line* curr, char overflowChar) {
 }
 
 void gabungBaris(Line* atas, Line* bawah) {
-
+    
     strcat(atas->info, bawah->info);
     atas->len = atas->len + bawah->len;
 
@@ -134,6 +134,25 @@ void gabungBaris(Line* atas, Line* bawah) {
 
     free(bawah);
 }
+
+void bersihkanMemori() {
+    Line* curr = head;
+    Line* hapus;  // konsistenkan huruf kecil
+    
+    while (curr != NULL) {
+        hapus = curr;          
+        curr = curr->next; 
+        free(hapus);               
+    }
+    head = NULL;
+    tail = NULL;
+    kursor.currentLine = NULL;
+    kursor.select = NULL;
+    kursor.isShift = false; 
+    kursor.kursorX = 0;
+    kursor.offsetY = 0;
+}
+
 void backspace() {
     Line* curr = kursor.currentLine;
     if (kursor.kursorX == 0) {
@@ -377,16 +396,27 @@ void tampilkanTeks() {
 
         for (int i = 0; i < MAX_KOLOM && i < LEBAR_LAYAR; i++) {
             bool isHighlight = false;
-            
+
             if (kursor.isShift && inSelection) {
                 if (startLine == endLine) { 
-                    if (i >= startPos && i < endPos) isHighlight = true;
-                } else if (temp == startLine) { 
-                    if (i >= startPos) isHighlight = true;
-                } else if (temp == endLine) { 
-                    if (i < endPos) isHighlight = true;
-                } else { 
-                    isHighlight = true; 
+                    if (i >= startPos && i < endPos) {
+                        isHighlight = true;
+                    }
+                }
+                else if (temp == startLine) { 
+                    if (i >= startPos && i < temp->len) {
+                        isHighlight = true;
+                    }
+                } 
+                else if (temp == endLine) { 
+                    if (i < endPos) {
+                        isHighlight = true;
+                    }
+                } 
+                else { 
+                    if (i < temp->len) {
+                    isHighlight = true;
+                    }
                 }
             }
 
