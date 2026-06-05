@@ -67,11 +67,9 @@ int charcounter(Line *head){
 int linecounter(Line *head){
     int baris = 0;
     while(head != NULL){
-        printf("[%d] '%s'\n", baris+1, head->info);
         baris++;
         head = head->next;
     }
-
     return baris;
 }
 
