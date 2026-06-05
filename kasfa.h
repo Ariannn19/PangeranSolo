@@ -1,14 +1,14 @@
 #ifndef kasfa_H
 #define kasfa_H
-#define MAX_LINES 100
-#define MAX_LENGTH 100
+#include "arian.h"
+#include <ctype.h>
 
-//extern char text[MAX_LINES][MAX_LENGTH];
-//extern int linecount;
-
-void displaytext (char text[][MAX_LENGTH], int linecount);
-void find (char text[][MAX_LENGTH],int linecount);
-void wordcounter (char text[][MAX_LENGTH], int linecount);
-void wraptext(char text[][MAX_LENGTH], int linecount);
+void find(Line *head,char keyword[]);
+int wordcounter(Line *head);
+int charcounter(Line *head);
+int linecounter(Line *head);
+void copy();
+void paste();
+void cut();
 
 #endif

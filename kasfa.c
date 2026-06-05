@@ -1,108 +1,185 @@
 #include <stdio.h>
 #include <string.h>
 #include "kasfa.h"
-#define max_wrap 20
+char clipboard[MAX_KOLOM];
 
-//int linecount = 0;
-void displaytext(char text[][MAX_LENGTH], int linecount){
-    int i = 0;
-    while(i < linecount){
-        printf("%d: %s\n", i + 1, text[i]);
-        i++;
+
+void find(Line *head,char keyword[]){
+    int baris = 1;
+    int ketemu = 0;
+    while(head != NULL){
+        if(strstr(head->info,keyword) != NULL){
+            printf("Kata ditemukan pada baris %d: %s\n",baris,head->info);
+            ketemu = 1;
+        }
+        head = head->next;
+        baris++;
     }
+
+    if(ketemu !=  1){
+        printf("Kata tidak ditemukan :( \n");
+    }
+    printf("Find selesai\n");
 }
 
-void find (char text[][MAX_LENGTH],int linecount){
-    char keyword [20];
-    int found = 0;
-    int i;
+int wordcounter(Line *head){
+    Line *temp= head;
+    int total = 0;
 
-    printf("masukan kata yang ingin kamu cari: ");
-    fflush(stdin);
-    fgets(keyword,sizeof(keyword),stdin);
-    keyword[strcspn(keyword, "\n")] = 0;
+    while(temp != NULL){
+        char *kata = temp->info;
+        int i = 0;
+        while(kata[i] != '\0'){
+            if((!isspace(kata[i]) && (i == 0 || isspace(kata[i - 1])))){
+                total++;
+            }
+            i++;
+        }
+        temp = temp->next;
+    }
 
-    if(strlen(keyword) == 0){
-        printf("Keyword tidak boleh kosong!\n");
+    return total;
+}
+
+int charcounter(Line *head){
+    Line *temp = head;
+    int total = 0;
+
+    while(temp != NULL){
+        char *kata = temp->info;
+        int i = 0;
+        while(kata[i] != '\0'){
+            total++;
+            i++;
+        }
+
+        //untuk menghitung newline nya
+        if(temp->next != NULL){
+            total++;
+        }
+
+        temp = temp->next;
+    }
+
+    return total;
+}
+
+int linecounter(Line *head){
+    int baris = 0;
+    while(head != NULL){
+        baris++;
+        head = head->next;
+    }
+    return baris;
+}
+
+void copy(){
+    int i,j = 0;
+    if(kursor.isShift == true && kursor.select != NULL){
+        blockArea area = panjangBlock();
+        Line* temp = area.startLine;
+        while(temp != NULL){
+            int btsAwal,btsAkhir;
+
+            if(temp == area.startLine){
+                btsAwal = area.startPos;
+            }else{
+                btsAwal = 0;    
+            }
+
+            if(temp == area.endLine){
+                btsAkhir = area.endPos;
+            }else{
+                btsAkhir = temp->len;
+            }
+
+            i = btsAwal;
+            while(i < btsAkhir){
+                clipboard[j] = temp->info[i];
+                i++;
+                j++;
+            }
+
+            if(temp == area.endLine){
+                break;
+            }else{
+                clipboard[j] = '\n';
+                j++;
+                temp = temp->next;
+            }
+        }
+        clipboard[j] = '\0';
+    }
+    
+}
+
+void paste(){
+    if(strlen(clipboard) == 0){
         return;
     }
 
-    i = 0;
-    while(i < linecount){
-
-        if(strstr(text[i], keyword) != NULL){
-            printf("Kata ada di baris ke %d: %s\n",i + 1, text[i]);
-            found = 1;
+    int batas = strlen(clipboard);
+    int i = 0;
+    while(i < batas){
+        if(clipboard[i] == '\n'){
+            enter();
+        }else{
+            insertChar(clipboard[i]);
         }
-
         i++;
-     }
-
-        if (!found){
-            printf("Kata tidak ditemukan\n");
-        }
-}
-
-void wordcounter (char text[][MAX_LENGTH], int linecount){
-    int totalchr = 0;
-    int totalkata = 0;
-
-    int i = 0;
-    while(i < linecount){
-        int tung = strlen(text[i]);
-        totalchr = totalchr + tung;
-
-        int j = 0;
-        while( j < tung){
-            if((j == 0 && text[i][j] != ' ') || (j > 0 && text[i][j] != ' ' && text [i][j - 1] == ' ')){
-                totalkata = totalkata + 1;
-            }
-            j = j + 1;
-        }
-        i = i + 1;
     }
-
-    printf("\nJumlah baris: %d", linecount);
-    printf("\nJumlah kata: %d", totalkata);
-    printf("\nJumlah karakter: %d", totalchr);
 }
 
-void wraptext(char text[][MAX_LENGTH], int linecount){
-    int i = 0;
-    while(i < linecount){
-        int len = strlen(text[i]);
-        int awal = 0;
+void cut() {
+    int i,j;
+    Line* hapus;
+    if(kursor.isShift == true && kursor.select != NULL){
+        blockArea area = panjangBlock();
+        copy();
 
-        while(awal < len){
-            int akhir = awal + max_wrap;
+        if(area.startLine == area.endLine){
+            int jumlah_potong = area.endPos - area.startPos;
+            i = area.endPos;
 
-            if(akhir >= len){
-                akhir = len;
+            while(i <= area.startLine->len){
+                area.startLine->info[i-jumlah_potong] = area.startLine->info[i];
+                i++;
             }
-            else{
-                int k = akhir;
-                while(k > awal && text[i][k] != ' '){
-                    k--;
-                }
+            area.startLine->len = area.startLine->len - jumlah_potong;
+            kursor.currentLine = area.startLine;
+            kursor.kursorX = area.startPos;
+        }else{
+            area.startLine->info[area.startPos] = '\0';
+            area.startLine->len = area.startPos;
 
-                if(k > awal){
-                    akhir = k;
-                }
-            }
-
-            int j = awal;
-            while(j < akhir){
-                printf("%c", text[i][j]);
+            i = area.endPos;
+            j = 0;
+            while(i <= area.endLine->len){
+                area.endLine->info[j] = area.endLine->info[i];
+                i++;
                 j++;
             }
-            printf("\n");
+            area.endLine->len = area.endLine->len - area.endPos;
 
-            awal = akhir;
-
-            while(text[i][awal] == ' '){
-                awal++;
+            hapus = area.startLine->next;
+            while(hapus != area.endLine){
+                Line* nextHps = hapus->next;
+                free(hapus);
+                hapus = nextHps;
             }
+
+            area.startLine->next = area.endLine;
+            area.endLine->prev = area.startLine;
+
+            if(area.startLine->len + area.endLine->len < MAX_KOLOM){
+                gabungBaris(area.startLine,area.endLine);
+            }
+
+            kursor.currentLine = area.startLine;
+            kursor.kursorX =  area.startPos;
         }
-        i++;
+        kursor.isShift = false;
+        kursor.select = NULL;
     }
+
 }
